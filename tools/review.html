@@ -323,12 +323,14 @@
     }
     function rerenderCard(card) {
       const c = data.candidates.find((x) => x.id === card.dataset.id);
-      const vid = card.querySelector(".vid");
       const tmp = document.createElement("div");
       tmp.innerHTML = cardHtml(c);
       const fresh = tmp.firstElementChild;
-      fresh.querySelector(".vid").replaceWith(vid); // garde le lecteur en cours
-      card.replaceWith(fresh);
+      // on ne touche pas au bloc .vid : déplacer une iframe dans le DOM la recharge,
+      // et le lecteur repartirait au début de l'extrait
+      card.className = fresh.className;
+      card.querySelector(".time-tools").replaceWith(fresh.querySelector(".time-tools"));
+      card.querySelector(".info").replaceWith(fresh.querySelector(".info"));
       refreshCounts();
     }
 
