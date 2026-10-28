@@ -105,9 +105,9 @@
       <button class="close" id="export-close" aria-label="Fermer">✕</button>
     </div>
     <div>
-      <p class="sub" style="margin:0">À coller dans le tableau <code>matches</code> de <code>data.js</code> (et retire les exemples si ce n'est pas déjà fait). Les duels déjà présents dans <code>data.js</code> ne sont pas répétés.</p>
+      <p class="sub" style="margin:0">« Ajouter à data.js » les écrit directement dans le tableau <code>matches</code> (avec <code>python3 tools/serve.py</code>). Sinon, copie-les et colle-les à la main. Les duels déjà présents dans <code>data.js</code> ne sont pas répétés.</p>
       <textarea id="export-code" readonly></textarea>
-      <div class="actions"><button class="btn primary" id="export-copy">Copier</button><span class="meta-line" id="export-msg"></span></div>
+      <div class="actions"><button class="btn primary" id="export-write">Ajouter à data.js</button><button class="btn" id="export-copy">Copier</button><span class="meta-line" id="export-msg"></span></div>
     </div>
   </dialog>
 
@@ -446,10 +446,11 @@
     });
 
     // ---------- export ----------
+    const toExport = () => data.candidates.filter((c) => st(c).status === "ok" && !existingMatch(c))
+      .sort((x, y) => (x.date || "").localeCompare(y.date || "") || x.start - y.start);
     function exportCode() {
       const q = JSON.stringify;
-      const ok = data.candidates.filter((c) => st(c).status === "ok" && !existingMatch(c))
-        .sort((x, y) => (x.date || "").localeCompare(y.date || "") || x.start - y.start);
+      const ok = toExport();
       if (!ok.length) return "// Aucun duel validé pour l'instant.";
       return ok.map((c) => {
         const s = st(c);
@@ -469,7 +470,37 @@
     $("#btn-export").addEventListener("click", () => {
       $("#export-code").value = exportCode();
       $("#export-msg").textContent = "";
+      $("#export-write").disabled = !toExport().length;
       $("#export").showModal();
+    });
+    // écrit directement dans site/data.js (nécessite tools/serve.py)
+    $("#export-write").addEventListener("click", async () => {
+      const ok = toExport();
+      if (!ok.length) return;
+      $("#export-write").disabled = true;
+      try {
+        const r = await fetch("/api/matches", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code: exportCode() }),
+        });
+        if (r.status === 501 || r.status === 405) throw new Error("serveur sans écriture : lance python3 tools/serve.py");
+        const res = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(res.error || r.status);
+      } catch (err) {
+        $("#export-msg").textContent = `Échec : ${err.message}`;
+        $("#export-write").disabled = false;
+        return;
+      }
+      ok.forEach((c) => {
+        const s = st(c);
+        EXISTING.push({ id: c.videoId + "-" + s.start, video: { id: c.videoId, start: s.start } });
+        s.status = "done";
+      });
+      save();
+      renderAll();
+      $("#export-code").value = exportCode();
+      $("#export-msg").textContent = `${ok.length} duel${ok.length > 1 ? "s" : ""} ajouté${ok.length > 1 ? "s" : ""} à data.js ✓`;
     });
     $("#export-close").addEventListener("click", () => $("#export").close());
     $("#export-copy").addEventListener("click", async () => {

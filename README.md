@@ -19,8 +19,10 @@ Les lecteurs YouTube intégrés refusent souvent de se lancer depuis `file://`, 
 Depuis la racine du projet (pour avoir accès au site **et** aux outils) :
 
 ```bash
-python3 -m http.server 8765
+python3 tools/serve.py
 ```
+
+C'est un `python3 -m http.server 8765` qui permet en plus à la page de validation d'écrire dans `site/data.js`.
 
 - le site : http://localhost:8765/site/
 - la validation : http://localhost:8765/tools/review.html
@@ -49,7 +51,8 @@ Pense à mettre yt-dlp à jour de temps en temps (`tools/.venv/bin/pip install -
 
 **Valider** : ouvrir http://localhost:8765/tools/review.html.
 Pour chaque passage : regarder l'extrait, caler début/fin (📍), saisir les coups de chaque manche, puis « Valider » ou « Pas un shifumi ».
-Le bouton « Exporter » donne les entrées prêtes à coller dans `site/data.js`.
+Le bouton « Exporter » puis « Ajouter à data.js » écrit les duels validés directement dans `site/data.js`
+(nécessite `tools/serve.py`). « Copier » donne les mêmes entrées à coller à la main.
 L'onglet « Sans détection » liste les vidéos où aucun mot-clé n'a été trouvé : marque-les « vérifiée » ou ajoute à la main un shifumi raté.
 La progression est gardée dans le navigateur (localStorage) : utilise toujours le même navigateur et la même adresse.
 
