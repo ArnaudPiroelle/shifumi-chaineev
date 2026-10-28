@@ -42,7 +42,10 @@ OUTPUT = TOOLS / "candidates.json"
 # "fort" = quasi certain d'être un shifumi ; "coup" = un coup isolé, qui ne compte
 # que s'il y en a au moins deux différents dans la même fenêtre.
 STRONG = [
-    re.compile(r"\b(?:s|c)h?[iy]+[\s-]*f+(?:ou|o|u)+[\s-]*mi+s?\b"),          # shifumi, chifoumi, chi fou mi
+    re.compile(r"\b(?:s|c)h?[iy]+[\s-]*f+(?:ou|o|u)+[\s-]*(?:mi+s?|i)\b"),    # shifumi, chifoumi, chi fou mi, chifoui
+    # un coup annoncé ou joué : "je fais pierre", "il a fait ciseaux", "tu joues papier"
+    re.compile(r"\b(?:fai[ts]?|faire|fera[is]?|jou\w*|sor[st]|sortir)\W+(?:(?:les?|la|du|de)\W+)?(?:pierre|feuille|papier|ciseaux?)\b"),
+    re.compile(r"\bciseaux?\b"),                                                # quasi toujours le shifumi, même seul
     re.compile(r"\bpierre\W+(?:\w+\W+){0,2}?(?:feuille|papier)\b"),             # pierre feuille / pierre, papier
     re.compile(r"\b(?:feuille|papier)\W+(?:\w+\W+){0,2}?ciseaux?\b"),
     re.compile(r"\bpierre\W+(?:\w+\W+){0,2}?ciseaux?\b"),
