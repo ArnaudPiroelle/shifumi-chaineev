@@ -31,14 +31,14 @@ document.documentElement.style.setProperty("--b", players.b.color);
 
   <nav class="tabs wrap" aria-label="Sections">
     <a href="#stats">📊 Infographie</a>
-    <a href="#duels">🎬 Tous les duels</a>
     <a href="#coach">🧠 Le coach</a>
+    <a href="#duels">🎬 Tous les duels</a>
   </nav>
 
   <main class="wrap">
     <StatsSection />
-    <DuelsSection @open="open" />
     <CoachSection />
+    <DuelsSection @open="open" />
   </main>
 
   <footer class="wrap">

@@ -10,13 +10,13 @@ describe("DuelCard", () => {
       id: "x-1",
       car: "Kia EV3",
       stake: "Qui conduit",
-      video: { id: "abc", start: "1:05", title: "" },
+      video: { id: "abc", start: "1:05", title: "Essai Kia EV3 : les vraies consos" },
     }),
   ]);
 
-  it("affiche la voiture, l'enjeu, le temps et les égalités", () => {
+  it("affiche le titre de la vidéo, l'enjeu, le temps et les égalités", () => {
     const text = mount(DuelCard, { props: { match: match! } }).text();
-    expect(text).toContain("Kia EV3");
+    expect(text).toContain("Essai Kia EV3 : les vraies consos");
     expect(text).toContain("🎯 Qui conduit");
     expect(text).toContain("1:05");
     expect(text).toContain("1 égalité");

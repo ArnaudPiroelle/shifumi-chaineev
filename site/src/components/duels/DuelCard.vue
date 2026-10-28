@@ -24,7 +24,7 @@ const thumb = computed(() => `https://i.ytimg.com/vi/${encodeURIComponent(props.
         <span>{{ fmtDate(match.date) }}</span>
         <span v-if="match.ties" class="badge-ties">{{ plural(match.ties, "égalité") }}</span>
       </div>
-      <div class="car">{{ match.car }}</div>
+      <div class="title" :title="match.video.title">{{ match.video.title || match.car }}</div>
       <div v-if="match.stake" class="stake">🎯 {{ match.stake }}</div>
       <RoundChain :match="match" />
       <div class="winner-tag">{{ match.winner ? `🏆 ${winner.name}` : "🤝 Pas de vainqueur" }}</div>

@@ -339,22 +339,6 @@ h1 {
   font-weight: 700;
   font-size: 1.4rem;
 }
-.form {
-  display: flex;
-  gap: 4px;
-  margin-top: 12px;
-  flex-wrap: wrap;
-}
-.form b {
-  width: 22px;
-  height: 22px;
-  border-radius: 6px;
-  display: grid;
-  place-items: center;
-  font-size: 0.7rem;
-  color: #0b0f14;
-}
-
 /* Chart timeline */
 .chart svg {
   width: 100%;
@@ -487,9 +471,16 @@ h1 {
   font-size: 0.8rem;
   font-family: var(--mono);
 }
-.duel .car {
+/* titre de la vidéo : deux lignes au plus, le reste au survol */
+.duel .title {
   font-weight: 700;
-  font-size: 1.05rem;
+  font-size: 1rem;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
 }
 .duel .stake {
   color: var(--muted);
@@ -572,6 +563,7 @@ dialog::backdrop {
   flex: none;
 }
 .video {
+  position: relative;
   aspect-ratio: 16 / 9;
   background: #000;
 }
@@ -581,6 +573,33 @@ dialog::backdrop {
   border: 0;
   display: block;
 }
+.video-player {
+  width: 100%;
+  height: 100%;
+}
+/* fin de l'extrait : un voile sur toute la vidéo en pause, le bouton au centre */
+.video-end {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgb(0 0 0 / 0.6);
+  backdrop-filter: blur(2px);
+}
+.btn-continue {
+  border: 0;
+  border-radius: 999px;
+  padding: 14px 28px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.4);
+  background: var(--winner, var(--accent));
+  color: #0b0f14;
+  cursor: pointer;
+}
+.btn-continue:hover {
+  filter: brightness(1.1);
+}
 .video .empty {
   height: 100%;
   display: grid;
@@ -589,13 +608,13 @@ dialog::backdrop {
   text-align: center;
   padding: 16px;
 }
-#dlg-body {
+.dlg-body {
   padding: 18px;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
-#dlg-body a {
+.dlg-body a {
   color: var(--accent);
 }
 .steps {

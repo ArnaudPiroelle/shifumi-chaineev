@@ -2,8 +2,7 @@
 import { useShifumi } from "../../composables/useShifumi";
 import { PLAYER_IDS } from "../../domain/moves";
 
-const { players, matches, streaks, winnerOf } = useShifumi();
-const recent = matches.slice(-15);
+const { players, streaks } = useShifumi();
 </script>
 
 <template>
@@ -16,15 +15,5 @@ const recent = matches.slice(-15);
     <span class="v" :style="{ color: streaks.current.who ? players[streaks.current.who].color : 'inherit' }">
       {{ streaks.current.n }}
     </span>
-  </div>
-  <p class="sub" style="margin: 12px 0 0">Forme récente (du plus ancien au plus récent)</p>
-  <div class="form">
-    <b
-      v-for="m in recent"
-      :key="m.id"
-      :style="{ background: winnerOf(m).color }"
-      :title="`${m.car} — ${winnerOf(m).name}`"
-      >{{ m.winner ? winnerOf(m).name[0] : "=" }}</b
-    >
   </div>
 </template>

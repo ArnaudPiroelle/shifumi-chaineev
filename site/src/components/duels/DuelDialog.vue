@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
 import { useShifumi } from "../../composables/useShifumi";
+import { useYouTubePlayer, type Clip } from "../../composables/useYouTubePlayer";
 import { fmtDate, plural } from "../../domain/format";
 import { MOVES, roundResult } from "../../domain/moves";
 import type { Match } from "../../domain/types";
+import VideoEndOverlay from "./VideoEndOverlay.vue";
 
 const props = defineProps<{ match: Match | undefined }>();
 const emit = defineEmits<{ close: [] }>();
@@ -23,14 +25,12 @@ watch(() => props.match, sync, { flush: "post" });
 onMounted(() => sync(props.match));
 
 const winner = computed(() => props.match && winnerOf(props.match));
-const embedUrl = computed(() => {
-  const m = props.match;
-  if (!m) return "";
-  const params = new URLSearchParams({ autoplay: "1", rel: "0", modestbranding: "1" });
-  if (m.start != null) params.set("start", String(m.start));
-  if (m.end != null) params.set("end", String(m.end));
-  return `https://www.youtube-nocookie.com/embed/${encodeURIComponent(m.video.id)}?${params}`;
-});
+// le lecteur n'existe que dialogue ouvert : le fermer coupe la vidéo
+const videoBox = ref<HTMLElement>();
+const clip = computed<Clip | undefined>(() =>
+  props.match ? { videoId: props.match.video.id, start: props.match.start, end: props.match.end } : undefined,
+);
+const { pausedAtEnd, resume } = useYouTubePlayer(videoBox, clip);
 const youtubeUrl = computed(() => {
   const m = props.match;
   if (!m) return "";
@@ -60,18 +60,11 @@ function onBackdropClick(e: MouseEvent) {
         <strong>{{ match.video.title || match.car }}</strong>
         <button class="close" aria-label="Fermer" @click="dialog?.close()">✕</button>
       </div>
-      <!-- l'iframe n'existe que dialogue ouvert : la fermer coupe la vidéo -->
       <div class="video">
-        <iframe
-          :key="match.id"
-          :src="embedUrl"
-          title="Extrait YouTube"
-          allow="autoplay; encrypted-media; picture-in-picture"
-          allowfullscreen
-          referrerpolicy="strict-origin-when-cross-origin"
-        ></iframe>
+        <div ref="videoBox" class="video-player"></div>
+        <VideoEndOverlay v-if="pausedAtEnd" @continue="resume" />
       </div>
-      <div>
+      <div class="dlg-body">
         <div class="duel-top">
           <span>{{ fmtDate(match.date) }} · {{ match.car }}</span>
           <span><a :href="youtubeUrl" target="_blank" rel="noopener">Ouvrir sur YouTube ↗</a></span>
