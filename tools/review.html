@@ -223,6 +223,21 @@
     // touché ici reprend les valeurs du fichier ; s'il a changé des deux côtés, c'est un conflit
     function syncWithFile(c) {
       const s = st(c), ex = existingMatch(c);
+      // le statut suit le fichier : un passage publié depuis (ailleurs, à la main…) passe en « publié »,
+      // un passage retiré du fichier revient « à traiter »
+      if (ex && (s.status === "todo" || s.status === "ko")) {
+        Object.assign(s, fieldsOf(ex, c));
+        s.status = "done";
+        s.base = fieldsKey(s);
+        delete s.conflict;
+        return;
+      }
+      if (!ex && s.status === "done") {
+        s.status = "todo";
+        delete s.base;
+        delete s.conflict;
+        return;
+      }
       if (!ex || (s.status !== "done" && s.status !== "ok")) return;
       const file = fieldsKey(fieldsOf(ex, c));
       if (s.base == null && s.status === "ok") s.base = file; // validé ici avant le suivi des modifications
