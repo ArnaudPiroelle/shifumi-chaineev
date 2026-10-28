@@ -1,0 +1,4 @@
+dist
+node_modules
+# écrit par tools/serve.py : on garde son format
+src/data/shifumi.json

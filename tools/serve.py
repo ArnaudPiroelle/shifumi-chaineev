@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-Serveur local du projet : sert le site et les outils comme `python3 -m http.server`,
-et permet à tools/review.html d'ajouter ou mettre à jour directement les duels dans site/data.js.
+Serveur local des outils : sert le projet comme `python3 -m http.server`,
+et permet à tools/review.html d'ajouter ou mettre à jour directement les duels dans
+site/src/data/shifumi.json.
 
   python3 tools/serve.py            # http://localhost:8765/
   python3 tools/serve.py --port 9000
@@ -12,43 +13,33 @@ lui-même : rien n'est exposé sur le réseau.
 
 import argparse
 import json
-import re
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-DATA = ROOT / "site" / "data.js"
-
-# fin du tableau `matches` : la dernière ligne "  ]," juste avant le "};" final
-MATCHES_END = re.compile(r"\n(\s*)\],\s*\n\};\s*$")
-
-
-def entry_block(entry_id):
-    # un duel tel qu'écrit par l'export : de "{" + id: "<id>", jusqu'au "}," de même indentation
-    return re.compile(r"\n([ \t]*)\{[ \t]*\n\s*id:\s*" + re.escape(json.dumps(entry_id)) + r",.*?\n\1\},", re.S)
+DATA = ROOT / "site" / "src" / "data" / "shifumi.json"
 
 
 def write_matches(entries):
-    """entries : [{id, code, replace}] ; replace = remplace le duel de même id au lieu de l'ajouter"""
-    text = DATA.read_text(encoding="utf-8")
+    """entries : [{id, match, replace}] ; replace = remplace le duel de même id au lieu de l'ajouter"""
+    data = json.loads(DATA.read_text(encoding="utf-8"))
+    matches = data["matches"]
     for e in entries:
-        code = e["code"].rstrip()
-        if not isinstance(code, str) or not code.lstrip().startswith("{"):
+        match = e["match"]
+        if not isinstance(match, dict) or match.get("id") != e["id"]:
             raise ValueError("duel mal formé")
         if e.get("replace"):
-            found = list(entry_block(e["id"]).finditer(text))
+            found = [i for i, m in enumerate(matches) if m.get("id") == e["id"]]
             if len(found) != 1:
-                raise ValueError(f"duel {e['id']} introuvable dans site/data.js")
-            m = found[0]
-            text = f"{text[:m.start()]}\n{code}{text[m.end():]}"
+                raise ValueError(f"duel {e['id']} introuvable (ou en double) dans shifumi.json")
+            matches[found[0]] = match
         else:
-            m = MATCHES_END.search(text)
-            if not m:
-                raise ValueError("fin du tableau matches introuvable dans site/data.js")
-            text = f"{text[:m.start()].rstrip(chr(10))}\n{code}\n{text[m.start() + 1:]}"
-    # tout est calculé avant d'écrire : une erreur ne laisse pas data.js à moitié modifié
-    DATA.write_text(text, encoding="utf-8")
+            if any(m.get("id") == e["id"] for m in matches):
+                raise ValueError(f"duel {e['id']} déjà présent dans shifumi.json")
+            matches.append(match)
+    # tout est calculé avant d'écrire : une erreur ne laisse pas le fichier à moitié modifié
+    DATA.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
 class Handler(SimpleHTTPRequestHandler):
@@ -78,7 +69,7 @@ class Handler(SimpleHTTPRequestHandler):
         self.wfile.write(body)
 
     def end_headers(self):
-        # data.js et candidates.json changent souvent : pas de cache
+        # shifumi.json et candidates.json changent souvent : pas de cache
         self.send_header("Cache-Control", "no-store")
         super().end_headers()
 
@@ -88,7 +79,6 @@ def main():
     ap.add_argument("--port", type=int, default=8765)
     args = ap.parse_args()
     server = ThreadingHTTPServer(("127.0.0.1", args.port), partial(Handler, directory=str(ROOT)))
-    print(f"Site : http://localhost:{args.port}/site/")
     print(f"Validation : http://localhost:{args.port}/tools/review.html")
     try:
         server.serve_forever()

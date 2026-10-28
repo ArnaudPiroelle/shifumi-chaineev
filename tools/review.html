@@ -6,7 +6,7 @@
   <title>Validation des shifumis</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔍</text></svg>">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
-  <link rel="stylesheet" href="../site/style.css">
+  <link rel="stylesheet" href="../site/src/styles/main.css">
   <style>
     .top { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; padding: 24px 0 8px; }
     .top h1 { font-size: 1.8rem; }
@@ -87,7 +87,7 @@
         <h1>Validation des shifumis 🔍</h1>
         <div class="meta-line" id="meta"></div>
       </div>
-      <a class="btn" href="../site/index.html">← Retour au site</a>
+      <a class="btn" href="http://localhost:5173/">← Retour au site</a>
     </div>
 
     <div class="bar-tools">
@@ -101,29 +101,38 @@
 
   <dialog id="export">
     <div class="dlg-head">
-      <strong>Entrées à coller dans <code>data.js</code></strong>
+      <strong>Duels à écrire dans <code>shifumi.json</code></strong>
       <button class="close" id="export-close" aria-label="Fermer">✕</button>
     </div>
     <div>
-      <p class="sub" style="margin:0">« Ajouter à data.js » les écrit directement dans le tableau <code>matches</code> (avec <code>python3 tools/serve.py</code>). Sinon, copie-les et colle-les à la main. Les duels déjà présents dans <code>data.js</code> ne sont pas répétés.</p>
+      <p class="sub" style="margin:0">« Enregistrer » les écrit directement dans <code>site/src/data/shifumi.json</code> (avec <code>python3 tools/serve.py</code>) : les nouveaux sont ajoutés, les duels déjà présents et modifiés sont remplacés. Sinon, copie-les dans le tableau <code>matches</code> à la main.</p>
       <textarea id="export-code" readonly></textarea>
-      <div class="actions"><button class="btn primary" id="export-write">Ajouter à data.js</button><button class="btn" id="export-copy">Copier</button><span class="meta-line" id="export-msg"></span></div>
+      <div class="actions"><button class="btn primary" id="export-write">Enregistrer</button><button class="btn" id="export-copy">Copier</button><span class="meta-line" id="export-msg"></span></div>
     </div>
   </dialog>
 
-  <script src="../site/data.js"></script>
   <script>
-  (() => {
+  (async () => {
     "use strict";
+    // les duels déjà publiés, lus depuis les sources du site (servies par tools/serve.py)
+    let SHIFUMI;
+    try {
+      const r = await fetch("../site/src/data/shifumi.json", { cache: "no-store" });
+      if (!r.ok) throw new Error(r.status);
+      SHIFUMI = await r.json();
+    } catch {
+      document.querySelector("#list").innerHTML = `<div class="empty-state">Impossible de lire <code>site/src/data/shifumi.json</code>.<br>Lance <code>python3 tools/serve.py</code> depuis la racine du projet (voir README).</div>`;
+      return;
+    }
     const MOVES = {
       pierre:  { emoji: "✊", beats: "ciseaux" },
       feuille: { emoji: "✋", beats: "pierre" },
       ciseaux: { emoji: "✌️", beats: "feuille" },
     };
     const KEYS = Object.keys(MOVES);
-    const [A, B] = window.SHIFUMI_DATA.players;
+    const [A, B] = SHIFUMI.players;
     const P = { a: A, b: B };
-    const EXISTING = window.SHIFUMI_DATA.matches;
+    const EXISTING = SHIFUMI.matches;
     const STORE = "shifumi-review-v1";
 
     const $ = (s, el = document) => el.querySelector(s);
@@ -156,16 +165,21 @@
     function existingMatch(c) {
       return EXISTING.find((m) => m.video && m.video.id === c.videoId && Math.abs((toSec(m.video.start) ?? -1e9) - c.start) < 120);
     }
+    // les champs modifiables d'un duel publié, au format de l'état de validation
+    const fieldsOf = (ex, c) => ({
+      start: toSec(ex.video.start), end: ex.video.end != null ? toSec(ex.video.end) : c.end,
+      car: ex.car || "", stake: ex.stake || "", note: ex.note || "",
+      rounds: ex.rounds.map((r) => ({ a: r.a, b: r.b })),
+    });
+    // empreinte de ces champs, pour savoir qui a changé quoi
+    const fieldsKey = (s) => JSON.stringify([s.car.trim(), s.start, s.end ?? null, s.stake.trim(), s.note.trim(),
+      s.rounds.filter((r) => r.a || r.b).map((r) => [r.a, r.b])]);
     function st(c) {
       if (!state[c.id]) {
         const ex = existingMatch(c);
-        // un duel déjà dans data.js part de ce qui y est écrit, pour pouvoir le modifier
-        state[c.id] = ex ? {
-          status: "done",
-          start: toSec(ex.video.start), end: ex.video.end != null ? toSec(ex.video.end) : c.end,
-          car: ex.car || "", stake: ex.stake || "", note: ex.note || "",
-          rounds: ex.rounds.map((r) => ({ a: r.a, b: r.b })),
-        } : {
+        // un duel déjà publié part de ce qui y est écrit, pour pouvoir le modifier ;
+        // base = l'empreinte du fichier à ce moment-là
+        state[c.id] = ex ? { status: "done", ...fieldsOf(ex, c), base: fieldsKey(fieldsOf(ex, c)) } : {
           status: "todo",
           start: c.start, end: c.end,
           car: guessCar(c.title), stake: "", note: "",
@@ -197,11 +211,36 @@
         data = d;
         // les duels ajoutés à la main survivent aux relances de detect.py
         (state.__manual || []).forEach((c) => d.candidates.unshift(c));
-        d.candidates.forEach(st); save(); renderAll();
+        d.candidates.forEach(st);
+        d.candidates.forEach(syncWithFile);
+        save(); renderAll();
       })
       .catch(() => {
         $("#list").innerHTML = `<div class="empty-state">Pas encore de <code>tools/candidates.json</code>.<br>Lance d'abord <code>python3 tools/detect.py</code>, puis sers le dossier en HTTP (voir README).</div>`;
       });
+
+    // shifumi.json a pu être modifié à la main depuis la dernière visite : un duel publié qu'on n'a pas
+    // touché ici reprend les valeurs du fichier ; s'il a changé des deux côtés, c'est un conflit
+    function syncWithFile(c) {
+      const s = st(c), ex = existingMatch(c);
+      if (!ex || (s.status !== "done" && s.status !== "ok")) return;
+      const file = fieldsKey(fieldsOf(ex, c));
+      if (s.base == null && s.status === "ok") s.base = file; // validé ici avant le suivi des modifications
+      const untouched = s.base == null || fieldsKey(s) === s.base;
+      if (untouched) {
+        Object.assign(s, fieldsOf(ex, c));
+        s.base = file;
+        delete s.conflict;
+      } else {
+        s.conflict = file !== s.base;
+      }
+    }
+    function takeFromFile(c) {
+      const s = st(c);
+      Object.assign(s, fieldsOf(existingMatch(c), c));
+      s.base = fieldsKey(s);
+      delete s.conflict;
+    }
 
     // vidéos sans détection : état "à vérifier" / "vérifiée" / "shifumi ajouté à la main"
     const vstate = () => (state.__videos ||= {});
@@ -212,7 +251,7 @@
       return c;
     }
     function labelsFor(c) {
-      return { todo: `À traiter (${c.todo})`, ok: `Validés (${c.ok})`, ko: `Rejetés (${c.ko})`, done: `Déjà dans data.js (${c.done})`, nodet: `Sans détection (${c.nodet})` };
+      return { todo: `À traiter (${c.todo})`, ok: `Validés (${c.ok})`, ko: `Rejetés (${c.ko})`, done: `Déjà publiés (${c.done})`, nodet: `Sans détection (${c.nodet})` };
     }
     function renderAll() {
       const c = counts();
@@ -310,8 +349,9 @@
             <span>${esc(c.date || "date ?")}</span>
             ${c.manual ? "<span>ajouté à la main</span>" : `<span>détecté à ${fmt(c.start + 8)}</span><span>score ${c.score}</span>`}
             ${c.keywords.map((k) => `<span>${esc(k)}</span>`).join("")}
-            ${ex ? `<span class="warn">déjà dans data.js (${esc(ex.id)})</span>` : ""}
+            ${ex ? `<span class="warn">déjà publié (${esc(ex.id)})</span>` : ""}
             ${edited(c) ? `<span class="warn">modifié : à réexporter</span>` : ""}
+            ${st(c).conflict ? `<span class="warn">modifié ici et dans shifumi.json : non exporté</span>` : ""}
           </div>
           <div class="snippet">${highlight(c.snippet, c.keywords)}</div>
           <div class="row2">
@@ -324,6 +364,7 @@
             <button class="btn primary" data-act="ok" ${err ? "disabled" : ""}>✓ Valider</button>
             <button class="btn danger" data-act="ko">✕ Pas un shifumi</button>
             ${s.status !== "todo" ? `<button class="btn" data-act="todo">↺ Remettre à traiter</button>` : ""}
+            ${s.conflict ? `<button class="btn" data-act="from-file" title="Oublie les modifications faites ici">⤓ Reprendre le fichier</button>` : ""}
             <span class="err">${s.status === "todo" && err ? esc(err) : !err && isDraw(s) ? "🤝 Fin sur égalité : duel nul, sans vainqueur" : ""}</span>
           </div>
         </div>
@@ -401,6 +442,7 @@
         if (i === s.rounds.length - 1 && result(last) === null) s.rounds.push({ a: null, b: null });
       }
       if (act === "del-round") s.rounds.splice(+el.dataset.i, 1);
+      if (act === "from-file") takeFromFile(c);
       if (act === "ok" || act === "ko" || act === "todo") {
         if (act === "ok" && validate(s)) return;
         s.status = act;
@@ -454,7 +496,7 @@
     });
 
     // ---------- export ----------
-    // le duel au format data.js ; un duel déjà présent garde son id, sa date et son titre
+    // le duel au format de shifumi.json ; un duel déjà présent garde son id, sa date et son titre
     function entryOf(c) {
       const s = st(c), ex = existingMatch(c);
       const e = {
@@ -476,10 +518,11 @@
         x.stake || "", x.note || "", x.rounds.map((r) => [r.a, r.b])]);
       return key(e) === key(m);
     };
-    // duel déjà dans data.js et modifié depuis dans la page de validation
+    // duel déjà publié et modifié depuis dans la page de validation
     function edited(c) {
       const s = st(c), ex = existingMatch(c);
-      return !!ex && (s.status === "done" || s.status === "ok") && !validate(s) && !sameEntry(entryOf(c), ex);
+      return !!ex && (s.status === "done" || s.status === "ok") && !s.conflict && !validate(s)
+        && fieldsKey(s) !== s.base && !sameEntry(entryOf(c), ex);
     }
     function toExport() {
       const seen = new Set();
@@ -489,25 +532,12 @@
         .map((c) => ({ c, e: entryOf(c), replace: !!existingMatch(c) }))
         .filter(({ e }) => !seen.has(e.id) && seen.add(e.id));
     }
-    function entryCode(e) {
-      const q = JSON.stringify;
-      const v = e.video;
-      const video = [`id: ${q(v.id)}`, `start: ${q(v.start)}`, v.end != null ? `end: ${q(v.end)}` : "", `title: ${q(v.title)}`].filter(Boolean).join(", ");
-      const lines = [
-        `      id: ${q(e.id)},`,
-        `      date: ${q(e.date)},`,
-        `      car: ${q(e.car)},`,
-        `      video: { ${video} },`,
-        e.stake ? `      stake: ${q(e.stake)},` : "",
-        `      rounds: [${e.rounds.map((r) => `{ a: ${q(r.a)}, b: ${q(r.b)} }`).join(", ")}],`,
-        e.note ? `      note: ${q(e.note)},` : "",
-      ].filter(Boolean);
-      return `    {\n${lines.join("\n")}\n    },`;
-    }
+    // une entrée prête à coller dans le tableau "matches" de shifumi.json
+    const entryCode = (e) => JSON.stringify(e, null, 2).replace(/^/gm, "    ");
     function exportCode() {
       const list = toExport();
       if (!list.length) return "// Aucun duel validé ou modifié pour l'instant.";
-      return list.map(({ e, replace }) => (replace ? `    // remplace le duel ${JSON.stringify(e.id)} déjà présent\n` : "") + entryCode(e)).join("\n");
+      return list.map(({ e }) => entryCode(e)).join(",\n");
     }
     $("#btn-export").addEventListener("click", () => {
       $("#export-code").value = exportCode();
@@ -515,7 +545,7 @@
       $("#export-write").disabled = !toExport().length;
       $("#export").showModal();
     });
-    // écrit directement dans site/data.js (nécessite tools/serve.py)
+    // écrit directement dans site/src/data/shifumi.json (nécessite tools/serve.py)
     $("#export-write").addEventListener("click", async () => {
       const list = toExport();
       if (!list.length) return;
@@ -524,7 +554,7 @@
         const r = await fetch("/api/matches", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ entries: list.map(({ e, replace }) => ({ id: e.id, replace, code: entryCode(e) })) }),
+          body: JSON.stringify({ entries: list.map(({ e, replace }) => ({ id: e.id, replace, match: e })) }),
         });
         if (r.status === 501 || r.status === 405) throw new Error("serveur sans écriture : lance python3 tools/serve.py");
         const res = await r.json().catch(() => ({}));
@@ -537,7 +567,9 @@
       list.forEach(({ c, e, replace }) => {
         if (replace) EXISTING[EXISTING.findIndex((m) => m.id === e.id)] = e;
         else EXISTING.push(e);
-        st(c).status = "done";
+        const s = st(c);
+        s.status = "done";
+        s.base = fieldsKey(s);
       });
       save();
       renderAll();
@@ -546,7 +578,7 @@
       $("#export-msg").textContent = [
         added ? `${added} ajouté${added > 1 ? "s" : ""}` : "",
         updated ? `${updated} mis à jour` : "",
-      ].filter(Boolean).join(", ") + " dans data.js ✓";
+      ].filter(Boolean).join(", ") + " dans shifumi.json ✓";
     });
     $("#export-close").addEventListener("click", () => $("#export").close());
     $("#export-copy").addEventListener("click", async () => {

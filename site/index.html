@@ -1,114 +1,25 @@
 <!doctype html>
 <html lang="fr">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Shifumi Leaderboard — LaChaineEv</title>
-  <meta name="description" content="Le classement officieux des shifumis de LaChaineEv pendant leurs essais de voitures électriques.">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✊</text></svg>">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <header class="hero">
-    <div class="wrap">
-      <p class="eyebrow">⚡ LaChaineEv · Classement officieux</p>
-      <h1>Le Grand Prix du <span class="accent">Shifumi</span></h1>
-      <p class="lede">Chaque essai de voiture électrique a son duel de pierre-feuille-ciseaux. Voici qui mène la course.</p>
-
-      <div class="scoreboard" id="scoreboard"></div>
-    </div>
-  </header>
-
-  <nav class="tabs wrap" aria-label="Sections">
-    <a href="#stats">📊 Infographie</a>
-    <a href="#duels">🎬 Tous les duels</a>
-    <a href="#coach">🧠 Le coach</a>
-  </nav>
-
-  <main class="wrap">
-    <section id="stats">
-      <h2>Infographie</h2>
-      <div class="kpis" id="kpis"></div>
-
-      <div class="grid">
-        <article class="card span-2">
-          <h3>La course au titre</h3>
-          <p class="sub">Victoires cumulées, duel après duel</p>
-          <div id="timeline" class="chart"></div>
-        </article>
-
-        <article class="card">
-          <h3>Coups joués</h3>
-          <p class="sub">Toutes manches confondues, égalités comprises</p>
-          <div id="moves"></div>
-        </article>
-
-        <article class="card">
-          <h3>Coups gagnants</h3>
-          <p class="sub">Le coup qui a décroché la victoire</p>
-          <div id="winning"></div>
-        </article>
-
-        <article class="card">
-          <h3>Le coup d'ouverture</h3>
-          <p class="sub">Premier coup joué dans chaque duel</p>
-          <div id="opening"></div>
-        </article>
-
-        <article class="card">
-          <h3>Face-à-face des coups</h3>
-          <p class="sub">Chaque manche jouée — ligne : <span data-name="a"></span>, colonne : <span data-name="b"></span></p>
-          <div id="matrix"></div>
-        </article>
-
-        <article class="card">
-          <h3>Après une égalité…</h3>
-          <p class="sub">Garde-t-on le même coup ou change-t-on ?</p>
-          <div id="aftertie"></div>
-        </article>
-
-        <article class="card">
-          <h3>Séries</h3>
-          <p class="sub">Victoires d'affilée</p>
-          <div id="streaks"></div>
-        </article>
-      </div>
-    </section>
-
-    <section id="duels">
-      <h2>Tous les duels</h2>
-      <div class="filters">
-        <input type="search" id="q" placeholder="Rechercher une voiture, une vidéo…" aria-label="Rechercher">
-        <div class="seg" id="f-winner" role="group" aria-label="Filtrer par gagnant"></div>
-        <label class="check"><input type="checkbox" id="f-ties"> Avec égalités seulement</label>
-      </div>
-      <p class="count" id="count"></p>
-      <div class="duels" id="list"></div>
-    </section>
-
-    <section id="coach">
-      <h2>Le coach 🧠</h2>
-      <p class="sub">Ce que les stats conseillent pour battre chacun au prochain essai (à prendre avec beaucoup de second degré).</p>
-      <div class="grid" id="coach-cards"></div>
-    </section>
-  </main>
-
-  <footer class="wrap">
-    <p>Site de fan, non affilié à LaChaineEv. Les extraits sont des lecteurs YouTube intégrés.</p>
-  </footer>
-
-  <dialog id="player">
-    <div class="dlg-head">
-      <strong id="dlg-title"></strong>
-      <button class="close" id="dlg-close" aria-label="Fermer">✕</button>
-    </div>
-    <div class="video" id="dlg-video"></div>
-    <div id="dlg-body"></div>
-  </dialog>
-
-  <script src="data.js"></script>
-  <script src="app.js"></script>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Shifumi Leaderboard — LaChaineEv</title>
+    <meta
+      name="description"
+      content="Le classement officieux des shifumis de LaChaineEv pendant leurs essais de voitures électriques."
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✊</text></svg>"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap"
+    />
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
 </html>
