@@ -158,8 +158,15 @@
     }
     function st(c) {
       if (!state[c.id]) {
-        state[c.id] = {
-          status: existingMatch(c) ? "done" : "todo",
+        const ex = existingMatch(c);
+        // un duel déjà dans data.js part de ce qui y est écrit, pour pouvoir le modifier
+        state[c.id] = ex ? {
+          status: "done",
+          start: toSec(ex.video.start), end: ex.video.end != null ? toSec(ex.video.end) : c.end,
+          car: ex.car || "", stake: ex.stake || "", note: ex.note || "",
+          rounds: ex.rounds.map((r) => ({ a: r.a, b: r.b })),
+        } : {
+          status: "todo",
           start: c.start, end: c.end,
           car: guessCar(c.title), stake: "", note: "",
           rounds: [{ a: null, b: null }],
@@ -304,6 +311,7 @@
             ${c.manual ? "<span>ajouté à la main</span>" : `<span>détecté à ${fmt(c.start + 8)}</span><span>score ${c.score}</span>`}
             ${c.keywords.map((k) => `<span>${esc(k)}</span>`).join("")}
             ${ex ? `<span class="warn">déjà dans data.js (${esc(ex.id)})</span>` : ""}
+            ${edited(c) ? `<span class="warn">modifié : à réexporter</span>` : ""}
           </div>
           <div class="snippet">${highlight(c.snippet, c.keywords)}</div>
           <div class="row2">
@@ -446,26 +454,60 @@
     });
 
     // ---------- export ----------
-    const toExport = () => data.candidates.filter((c) => st(c).status === "ok" && !existingMatch(c))
-      .sort((x, y) => (x.date || "").localeCompare(y.date || "") || x.start - y.start);
-    function exportCode() {
+    // le duel au format data.js ; un duel déjà présent garde son id, sa date et son titre
+    function entryOf(c) {
+      const s = st(c), ex = existingMatch(c);
+      const e = {
+        id: ex ? ex.id : c.videoId + "-" + s.start,
+        date: (ex && ex.date) || c.date || "",
+        car: s.car.trim(),
+        video: { id: c.videoId, start: fmt(s.start), end: s.end != null ? fmt(s.end) : null, title: (ex && ex.video.title) || c.title },
+        stake: s.stake.trim(),
+        rounds: s.rounds.filter((r) => r.a || r.b).map((r) => ({ a: r.a, b: r.b })),
+        note: s.note.trim(),
+      };
+      if (e.video.end == null) delete e.video.end;
+      if (!e.stake) delete e.stake;
+      if (!e.note) delete e.note;
+      return e;
+    }
+    const sameEntry = (e, m) => {
+      const key = (x) => JSON.stringify([x.car || "", fmt(toSec(x.video.start)), x.video.end != null ? fmt(toSec(x.video.end)) : "",
+        x.stake || "", x.note || "", x.rounds.map((r) => [r.a, r.b])]);
+      return key(e) === key(m);
+    };
+    // duel déjà dans data.js et modifié depuis dans la page de validation
+    function edited(c) {
+      const s = st(c), ex = existingMatch(c);
+      return !!ex && (s.status === "done" || s.status === "ok") && !validate(s) && !sameEntry(entryOf(c), ex);
+    }
+    function toExport() {
+      const seen = new Set();
+      return data.candidates
+        .filter((c) => (st(c).status === "ok" && !existingMatch(c)) || edited(c))
+        .sort((x, y) => (x.date || "").localeCompare(y.date || "") || x.start - y.start)
+        .map((c) => ({ c, e: entryOf(c), replace: !!existingMatch(c) }))
+        .filter(({ e }) => !seen.has(e.id) && seen.add(e.id));
+    }
+    function entryCode(e) {
       const q = JSON.stringify;
-      const ok = toExport();
-      if (!ok.length) return "// Aucun duel validé pour l'instant.";
-      return ok.map((c) => {
-        const s = st(c);
-        const video = [`id: ${q(c.videoId)}`, `start: ${q(fmt(s.start))}`, s.end != null ? `end: ${q(fmt(s.end))}` : "", `title: ${q(c.title)}`].filter(Boolean).join(", ");
-        const lines = [
-          `      id: ${q(c.videoId + "-" + s.start)},`,
-          `      date: ${q(c.date || "")},`,
-          `      car: ${q(s.car.trim())},`,
-          `      video: { ${video} },`,
-          s.stake.trim() ? `      stake: ${q(s.stake.trim())},` : "",
-          `      rounds: [${s.rounds.filter((r) => r.a || r.b).map((r) => `{ a: ${q(r.a)}, b: ${q(r.b)} }`).join(", ")}],`,
-          s.note.trim() ? `      note: ${q(s.note.trim())},` : "",
-        ].filter(Boolean);
-        return `    {\n${lines.join("\n")}\n    },`;
-      }).join("\n");
+      const v = e.video;
+      const video = [`id: ${q(v.id)}`, `start: ${q(v.start)}`, v.end != null ? `end: ${q(v.end)}` : "", `title: ${q(v.title)}`].filter(Boolean).join(", ");
+      const lines = [
+        `      id: ${q(e.id)},`,
+        `      date: ${q(e.date)},`,
+        `      car: ${q(e.car)},`,
+        `      video: { ${video} },`,
+        e.stake ? `      stake: ${q(e.stake)},` : "",
+        `      rounds: [${e.rounds.map((r) => `{ a: ${q(r.a)}, b: ${q(r.b)} }`).join(", ")}],`,
+        e.note ? `      note: ${q(e.note)},` : "",
+      ].filter(Boolean);
+      return `    {\n${lines.join("\n")}\n    },`;
+    }
+    function exportCode() {
+      const list = toExport();
+      if (!list.length) return "// Aucun duel validé ou modifié pour l'instant.";
+      return list.map(({ e, replace }) => (replace ? `    // remplace le duel ${JSON.stringify(e.id)} déjà présent\n` : "") + entryCode(e)).join("\n");
     }
     $("#btn-export").addEventListener("click", () => {
       $("#export-code").value = exportCode();
@@ -475,14 +517,14 @@
     });
     // écrit directement dans site/data.js (nécessite tools/serve.py)
     $("#export-write").addEventListener("click", async () => {
-      const ok = toExport();
-      if (!ok.length) return;
+      const list = toExport();
+      if (!list.length) return;
       $("#export-write").disabled = true;
       try {
         const r = await fetch("/api/matches", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ code: exportCode() }),
+          body: JSON.stringify({ entries: list.map(({ e, replace }) => ({ id: e.id, replace, code: entryCode(e) })) }),
         });
         if (r.status === 501 || r.status === 405) throw new Error("serveur sans écriture : lance python3 tools/serve.py");
         const res = await r.json().catch(() => ({}));
@@ -492,15 +534,19 @@
         $("#export-write").disabled = false;
         return;
       }
-      ok.forEach((c) => {
-        const s = st(c);
-        EXISTING.push({ id: c.videoId + "-" + s.start, video: { id: c.videoId, start: s.start } });
-        s.status = "done";
+      list.forEach(({ c, e, replace }) => {
+        if (replace) EXISTING[EXISTING.findIndex((m) => m.id === e.id)] = e;
+        else EXISTING.push(e);
+        st(c).status = "done";
       });
       save();
       renderAll();
       $("#export-code").value = exportCode();
-      $("#export-msg").textContent = `${ok.length} duel${ok.length > 1 ? "s" : ""} ajouté${ok.length > 1 ? "s" : ""} à data.js ✓`;
+      const added = list.filter((x) => !x.replace).length, updated = list.length - added;
+      $("#export-msg").textContent = [
+        added ? `${added} ajouté${added > 1 ? "s" : ""}` : "",
+        updated ? `${updated} mis à jour` : "",
+      ].filter(Boolean).join(", ") + " dans data.js ✓";
     });
     $("#export-close").addEventListener("click", () => $("#export").close());
     $("#export-copy").addEventListener("click", async () => {

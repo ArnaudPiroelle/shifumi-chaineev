@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Serveur local du projet : sert le site et les outils comme `python3 -m http.server`,
-et permet à tools/review.html d'ajouter directement les duels validés dans site/data.js.
+et permet à tools/review.html d'ajouter ou mettre à jour directement les duels dans site/data.js.
 
   python3 tools/serve.py            # http://localhost:8765/
   python3 tools/serve.py --port 9000
@@ -24,13 +24,31 @@ DATA = ROOT / "site" / "data.js"
 MATCHES_END = re.compile(r"\n(\s*)\],\s*\n\};\s*$")
 
 
-def add_matches(code):
+def entry_block(entry_id):
+    # un duel tel qu'écrit par l'export : de "{" + id: "<id>", jusqu'au "}," de même indentation
+    return re.compile(r"\n([ \t]*)\{[ \t]*\n\s*id:\s*" + re.escape(json.dumps(entry_id)) + r",.*?\n\1\},", re.S)
+
+
+def write_matches(entries):
+    """entries : [{id, code, replace}] ; replace = remplace le duel de même id au lieu de l'ajouter"""
     text = DATA.read_text(encoding="utf-8")
-    m = MATCHES_END.search(text)
-    if not m:
-        raise ValueError("fin du tableau matches introuvable dans site/data.js")
-    head = text[: m.start()].rstrip("\n")
-    DATA.write_text(f"{head}\n{code.rstrip()}\n{text[m.start() + 1:]}", encoding="utf-8")
+    for e in entries:
+        code = e["code"].rstrip()
+        if not isinstance(code, str) or not code.lstrip().startswith("{"):
+            raise ValueError("duel mal formé")
+        if e.get("replace"):
+            found = list(entry_block(e["id"]).finditer(text))
+            if len(found) != 1:
+                raise ValueError(f"duel {e['id']} introuvable dans site/data.js")
+            m = found[0]
+            text = f"{text[:m.start()]}\n{code}{text[m.end():]}"
+        else:
+            m = MATCHES_END.search(text)
+            if not m:
+                raise ValueError("fin du tableau matches introuvable dans site/data.js")
+            text = f"{text[:m.start()].rstrip(chr(10))}\n{code}\n{text[m.start() + 1:]}"
+    # tout est calculé avant d'écrire : une erreur ne laisse pas data.js à moitié modifié
+    DATA.write_text(text, encoding="utf-8")
 
 
 class Handler(SimpleHTTPRequestHandler):
@@ -43,11 +61,11 @@ class Handler(SimpleHTTPRequestHandler):
             return self.reply(403, {"error": "requête refusée"})
         try:
             body = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))))
-            code = body["code"]
-            if not isinstance(code, str) or not code.strip().startswith("{"):
-                raise ValueError("aucun duel à ajouter")
-            add_matches(code)
-        except (ValueError, KeyError, TypeError) as e:
+            entries = body["entries"]
+            if not isinstance(entries, list) or not entries:
+                raise ValueError("aucun duel à écrire")
+            write_matches(entries)
+        except (ValueError, KeyError, TypeError, AttributeError) as e:
             return self.reply(400, {"error": str(e)})
         self.reply(200, {"ok": True})
 
