@@ -32,7 +32,7 @@ export interface RawMatch {
     end?: string | number;
     title: string;
   };
-  /** l'enjeu du shifumi (facultatif) : "qui conduit", "qui paie le café"… */
+  /** l'enjeu du chifoumi (facultatif) : "qui conduit", "qui paie le café"… */
   stake?: string;
   /**
    * La suite des manches, dans l'ordre. Toutes sauf la dernière sont des égalités ;

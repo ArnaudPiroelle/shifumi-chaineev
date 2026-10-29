@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Validation des shifumis</title>
+  <title>Validation des chifoumis</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔍</text></svg>">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
   <link rel="stylesheet" href="../site/src/styles/main.css">
@@ -84,7 +84,7 @@
   <div class="wrap">
     <div class="top">
       <div>
-        <h1>Validation des shifumis 🔍</h1>
+        <h1>Validation des chifoumis 🔍</h1>
         <div class="meta-line" id="meta"></div>
       </div>
       <a class="btn" href="http://localhost:5173/">← Retour au site</a>
@@ -257,7 +257,7 @@
       delete s.conflict;
     }
 
-    // vidéos sans détection : état "à vérifier" / "vérifiée" / "shifumi ajouté à la main"
+    // vidéos sans détection : état "à vérifier" / "vérifiée" / "chifoumi ajouté à la main"
     const vstate = () => (state.__videos ||= {});
     function counts() {
       const c = { todo: 0, ok: 0, ko: 0, done: 0, nodet: 0 };
@@ -288,7 +288,7 @@
       }
       const order = (v) => (vstate()[v.videoId] ? 1 : 0); // les vidéos déjà vérifiées passent en bas
       const sorted = vids.slice().sort((x, y) => order(x) - order(y));
-      $("#list").innerHTML = `<p class="sub">Vidéos où aucun mot-clé n'a été trouvé. Parcours-les et marque-les comme vérifiées, ou ajoute le shifumi que la détection a raté.</p>`
+      $("#list").innerHTML = `<p class="sub">Vidéos où aucun mot-clé n'a été trouvé. Parcours-les et marque-les comme vérifiées, ou ajoute le chifoumi que la détection a raté.</p>`
         + sorted.map((v) => {
           const s = vstate()[v.videoId];
           return `<div class="vrow ${s ? "checked" : ""}" data-vid="${esc(v.videoId)}">
@@ -298,12 +298,12 @@
               <div class="tags">
                 <span>${esc(v.date || "date ?")}</span>${v.duration ? `<span>${fmt(v.duration)}</span>` : ""}
                 ${v.subs ? "" : '<span class="warn">pas de sous-titres</span>'}
-                ${s === "checked" ? "<span>✓ vérifiée, rien</span>" : s === "found" ? "<span>＋ shifumi ajouté</span>" : ""}
+                ${s === "checked" ? "<span>✓ vérifiée, rien</span>" : s === "found" ? "<span>＋ chifoumi ajouté</span>" : ""}
               </div>
             </div>
             <div class="actions">
               ${s ? `<button class="btn sm" data-act="v-reset">↺ À vérifier</button>`
-                  : `<button class="btn sm" data-act="v-checked">✓ Vérifiée, rien</button><button class="btn sm primary" data-act="v-add">＋ Il y a un shifumi</button>`}
+                  : `<button class="btn sm" data-act="v-checked">✓ Vérifiée, rien</button><button class="btn sm primary" data-act="v-add">＋ Il y a un chifoumi</button>`}
             </div>
           </div>`;
         }).join("");
@@ -323,7 +323,7 @@
     // ---------- carte candidat ----------
     function highlight(text, kws) {
       let html = esc(text);
-      const words = ["shifumi", "chifoumi", "chi fou mi", "pierre", "feuille", "papier", "ciseaux", "ciseau", ...kws];
+      const words = ["shifumi", "chifumi", "chifoumi", "chi fou mi", "pierre", "feuille", "papier", "ciseaux", "ciseau", ...kws];
       const rx = new RegExp("(" + [...new Set(words)].map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|") + ")", "gi");
       return html.replace(rx, "<mark>$1</mark>");
     }
@@ -377,7 +377,7 @@
           <label class="fld">Note (facultatif) <input type="text" data-f="note" value="${esc(s.note)}"></label>
           <div class="actions">
             <button class="btn primary" data-act="ok" ${err ? "disabled" : ""}>✓ Valider</button>
-            <button class="btn danger" data-act="ko">✕ Pas un shifumi</button>
+            <button class="btn danger" data-act="ko">✕ Pas un chifoumi</button>
             ${s.status !== "todo" ? `<button class="btn" data-act="todo">↺ Remettre à traiter</button>` : ""}
             ${s.conflict ? `<button class="btn" data-act="from-file" title="Oublie les modifications faites ici">⤓ Reprendre le fichier</button>` : ""}
             <span class="err">${s.status === "todo" && err ? esc(err) : !err && isDraw(s) ? "🤝 Fin sur égalité : duel nul, sans vainqueur" : ""}</span>
@@ -483,7 +483,7 @@
         const c = {
           id: `${vid}@main-${Date.now()}`, videoId: vid, title: v.title, date: v.date, manual: true,
           start: 0, end: null, score: 0, keywords: [],
-          snippet: "Ajouté à la main : lance la vidéo, trouve le shifumi puis cale le début avec 📍.",
+          snippet: "Ajouté à la main : lance la vidéo, trouve le chifoumi puis cale le début avec 📍.",
         };
         (state.__manual ||= []).push(c);
         data.candidates.unshift(c);

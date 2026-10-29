@@ -21,7 +21,7 @@ document.documentElement.style.setProperty("--b", players.b.color);
   <header class="hero">
     <div class="wrap">
       <p class="eyebrow">⚡ LaChaineEv · Classement officieux</p>
-      <h1>Le Grand Prix du <span class="accent">Shifumi</span></h1>
+      <h1>Le Grand Prix du <span class="accent">Chifoumi</span></h1>
       <p class="lede">
         Chaque essai de voiture électrique a son duel de pierre-feuille-ciseaux. Voici qui mène la course.
       </p>

@@ -1,6 +1,6 @@
-# Shifumi Leaderboard — LaChaineEv
+# Chifoumi Leaderboard — LaChaineEv
 
-Site qui recense les shifumis de LaChaineEv : Vue 3 + Vite + TypeScript, publié en site statique.
+Site qui recense les chifoumis de LaChaineEv : Vue 3 + Vite + TypeScript, publié en site statique.
 
 ```
 site/    le site public (projet Vue) — seul son build (site/dist/) est mis en ligne
@@ -74,11 +74,11 @@ pratique après avoir modifié les mots-clés), `--cookies-from-browser firefox`
 Pense à mettre yt-dlp à jour de temps en temps (`tools/.venv/bin/pip install -U yt-dlp`), YouTube change souvent.
 
 **Valider** : lancer `python3 tools/serve.py` puis ouvrir http://localhost:8765/tools/review.html.
-Pour chaque passage : regarder l'extrait, caler début/fin (📍), saisir les coups de chaque manche, puis « Valider » ou « Pas un shifumi ».
+Pour chaque passage : regarder l'extrait, caler début/fin (📍), saisir les coups de chaque manche, puis « Valider » ou « Pas un chifoumi ».
 Le bouton « Exporter » puis « Enregistrer » écrit les duels validés directement dans `site/src/data/shifumi.json`
 (nécessite `tools/serve.py`) ; un duel déjà publié et modifié dans la page est remplacé. « Copier » donne les mêmes entrées à coller à la main.
 Si `shifumi.json` a été modifié à la main, la page reprend ces valeurs ; un duel modifié des deux côtés est signalé et n'est pas exporté.
-L'onglet « Sans détection » liste les vidéos où aucun mot-clé n'a été trouvé : marque-les « vérifiée » ou ajoute à la main un shifumi raté.
+L'onglet « Sans détection » liste les vidéos où aucun mot-clé n'a été trouvé : marque-les « vérifiée » ou ajoute à la main un chifoumi raté.
 La progression est gardée dans le navigateur (localStorage) : utilise toujours le même navigateur et la même adresse.
 
 ## Mettre en ligne
