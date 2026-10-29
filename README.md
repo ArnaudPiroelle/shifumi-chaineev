@@ -87,8 +87,9 @@ Le site se publie en statique : la commande de build est `npm run build`, le dos
 
 - **Netlify / Cloudflare Pages** : « Base directory » = `site`, « Build command » = `npm run build`,
   « Publish directory » / « Build output directory » = `dist`.
-- **GitHub Pages** : un workflow GitHub Actions qui lance `npm ci && npm run build` dans `site/`, puis
-  `actions/upload-pages-artifact` avec `path: site/dist`.
+- **GitHub Pages** (en place) : le workflow `.github/workflows/deploy.yml` vérifie (`npm run check`), construit
+  et publie le site à chaque push sur `main`, ou à la demande depuis l'onglet Actions. À activer une fois dans
+  Settings → Pages → Source = « GitHub Actions ».
 - **Hébergement FTP / autre** : lancer `npm run build` et n'envoyer que le contenu de `site/dist/`.
 
 Le build utilise des chemins relatifs : il marche aussi publié dans un sous-dossier.
