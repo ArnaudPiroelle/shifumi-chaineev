@@ -843,6 +843,50 @@ dialog::backdrop {
   background: rgb(0 0 0 / 0.6);
   backdrop-filter: blur(2px);
 }
+.video-end-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+.btn-replay {
+  border: 1px solid rgb(255 255 255 / 0.4);
+  border-radius: 999px;
+  padding: 13px 24px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  background: rgb(0 0 0 / 0.4);
+  cursor: pointer;
+}
+.btn-replay:hover {
+  border-color: #fff;
+}
+/* calque transparent sur la vidéo : pas d'interface YouTube, un clic met en pause ou relance */
+.video-shield {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.video-shield.stopped {
+  background: rgb(0 0 0 / 0.45);
+}
+.video-play {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  padding-left: 6px;
+  border-radius: 50%;
+  background: var(--winner, var(--accent));
+  color: #0b0f14;
+  font-size: 1.8rem;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.4);
+}
 .dlg-links {
   display: flex;
   flex-wrap: wrap;

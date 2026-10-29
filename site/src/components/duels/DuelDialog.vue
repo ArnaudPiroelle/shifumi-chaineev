@@ -32,7 +32,7 @@ const videoBox = ref<HTMLElement>();
 const clip = computed<Clip | undefined>(() =>
   props.match ? { videoId: props.match.video.id, start: props.match.start, end: props.match.end } : undefined,
 );
-const { pausedAtEnd, resume } = useYouTubePlayer(videoBox, clip);
+const { pausedAtEnd, stopped, resume, toggle, replay } = useYouTubePlayer(videoBox, clip);
 const links = computed(() =>
   props.match
     ? { youtube: youtubeUrl(props.match), report: reportIssueUrl(GITHUB_REPO, props.match, players) }
@@ -64,7 +64,17 @@ function onBackdropClick(e: MouseEvent) {
       </div>
       <div class="video">
         <div ref="videoBox" class="video-player"></div>
-        <VideoEndOverlay v-if="pausedAtEnd" @continue="resume" />
+        <VideoEndOverlay v-if="pausedAtEnd" @continue="resume" @replay="replay" />
+        <!-- calque par-dessus l'iframe : masque l'interface de YouTube au survol, un clic = pause / lecture -->
+        <button
+          v-else
+          class="video-shield"
+          :class="{ stopped }"
+          :aria-label="stopped ? 'Lire la vidéo' : 'Mettre la vidéo en pause'"
+          @click="toggle"
+        >
+          <span v-if="stopped" class="video-play" aria-hidden="true">▶</span>
+        </button>
       </div>
       <div class="dlg-body">
         <div class="duel-top">
