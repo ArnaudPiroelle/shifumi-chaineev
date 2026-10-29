@@ -44,7 +44,7 @@ h2 {
   margin: 56px 0 20px;
 }
 section {
-  scroll-margin-top: 24px;
+  scroll-margin-top: 72px; /* la barre d'onglets collante ne cache pas le titre */
 }
 h3 {
   font-size: 1.05rem;
@@ -572,6 +572,41 @@ h1 {
   font-size: 0.85rem;
 }
 
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  margin-top: 24px;
+}
+.pager button {
+  min-width: 38px;
+  padding: 7px 12px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+}
+.pager button:hover:not(:disabled) {
+  background: var(--panel-2);
+}
+.pager button[aria-current="page"] {
+  background: var(--panel-2);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 700;
+}
+.pager button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.pager .gap {
+  color: var(--muted);
+  padding: 0 4px;
+}
 .duels {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -841,6 +876,9 @@ footer {
 }
 
 @media (max-width: 560px) {
+  .pager-label {
+    display: none;
+  }
   .scoreboard {
     padding: 16px;
     gap: 8px;
