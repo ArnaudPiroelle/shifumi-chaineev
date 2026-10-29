@@ -416,6 +416,23 @@ h1 {
   color: var(--muted);
   font-size: 0.85rem;
 }
+/* vue éclatée : la part survolée (ou son pourcentage) sort du camembert */
+.donut .slice {
+  transition: transform 0.2s ease-out;
+  cursor: default;
+}
+.donut .share {
+  border-radius: 6px;
+  padding: 1px 4px;
+  cursor: default;
+  transition:
+    color 0.15s,
+    background 0.15s;
+}
+.donut .share.on {
+  color: var(--text);
+  background: var(--panel-2);
+}
 
 /* Matrice */
 .matrix {
