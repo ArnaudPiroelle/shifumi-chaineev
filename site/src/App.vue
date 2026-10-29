@@ -42,7 +42,7 @@ document.documentElement.style.setProperty("--b", players.b.color);
   </main>
 
   <footer class="wrap">
-    <p>Site de fan, non affilié à LaChaineEv. Les extraits sont des lecteurs YouTube intégrés.</p>
+    <p>Site non officiel, indépendant de LaChaineEv. Les extraits vidéo sont lus depuis YouTube.</p>
   </footer>
 
   <DuelDialog :match="openMatch" @close="close" />
