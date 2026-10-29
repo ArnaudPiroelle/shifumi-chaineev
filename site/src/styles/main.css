@@ -82,6 +82,15 @@ button {
   display: flex;
   gap: 8px;
 }
+/* trop étroit pour tenir à côté du sur-titre : les boutons prennent leur propre ligne, au même endroit */
+@media (max-width: 720px) {
+  .hero-actions {
+    position: static;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    margin: -32px 0 16px;
+  }
+}
 .play-link,
 .gh-link {
   display: inline-flex;
