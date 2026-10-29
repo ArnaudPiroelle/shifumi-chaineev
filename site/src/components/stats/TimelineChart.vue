@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useShifumi } from "../../composables/useShifumi";
 import { fmtDate } from "../../domain/format";
 import { PLAYER_IDS } from "../../domain/moves";
@@ -28,7 +28,35 @@ const chart = computed(() => {
       m.winner === id ? [{ cx: x(i + 1), cy: y(cumulative[i + 1]![id]), title: `${m.car} — ${fmtDate(m.date)}` }] : [],
     ),
   }));
-  return { grid, lines };
+  return { grid, lines, x, y };
+});
+
+// survol : on se cale sur le duel le plus proche du pointeur (1 = après le premier duel)
+const hover = ref<number | null>(null);
+function track(e: PointerEvent) {
+  const svg = e.currentTarget as SVGSVGElement;
+  const rect = svg.getBoundingClientRect();
+  const vx = ((e.clientX - rect.left) / rect.width) * W;
+  const n = matches.length;
+  const i = Math.round(((vx - pad.l) / (W - pad.l - pad.r)) * Math.max(n, 1));
+  hover.value = n ? Math.min(Math.max(i, 1), n) : null;
+}
+const tip = computed(() => {
+  const i = hover.value;
+  const m = i === null ? undefined : matches[i - 1];
+  const score = i === null ? undefined : cumulative[i];
+  if (i === null || !m || !score) return null;
+  const { x, y } = chart.value;
+  const px = x(i);
+  return {
+    px,
+    left: `${(px / W) * 100}%`,
+    flip: px > W / 2,
+    num: i,
+    m,
+    score,
+    dots: PLAYER_IDS.map((id) => ({ id, cy: y(score[id]), color: players[id].color })),
+  };
 });
 const first = matches[0];
 const last = matches[matches.length - 1];
@@ -36,7 +64,14 @@ const last = matches[matches.length - 1];
 
 <template>
   <div class="chart">
-    <svg :viewBox="`0 0 ${W} ${H}`" role="img" aria-label="Victoires cumulées">
+    <svg
+      :viewBox="`0 0 ${W} ${H}`"
+      role="img"
+      aria-label="Victoires cumulées"
+      @pointermove="track"
+      @pointerdown="track"
+      @pointerleave="hover = null"
+    >
       <template v-for="g in chart.grid" :key="g.v">
         <line class="grid-line" :x1="pad.l" :x2="W - pad.r" :y1="g.y" :y2="g.y" />
         <text :x="pad.l - 8" :y="g.y + 4" text-anchor="end">{{ g.v }}</text>
@@ -47,11 +82,24 @@ const last = matches[matches.length - 1];
           <title>{{ d.title }}</title>
         </circle>
       </template>
+      <g v-if="tip" class="hover-mark" pointer-events="none">
+        <line :x1="tip.px" :x2="tip.px" :y1="pad.t" :y2="H - pad.b" />
+        <circle v-for="d in tip.dots" :key="d.id" :cx="tip.px" :cy="d.cy" r="6" :fill="d.color" />
+      </g>
       <template v-if="first && last">
         <text :x="pad.l" :y="H - 6">{{ fmtDate(first.date) }}</text>
         <text :x="W - pad.r" :y="H - 6" text-anchor="end">{{ fmtDate(last.date) }}</text>
       </template>
     </svg>
+    <div v-if="tip" class="chart-tip" :class="{ flip: tip.flip }" :style="{ left: tip.left }">
+      <div class="tip-head">Duel {{ tip.num }} · {{ fmtDate(tip.m.date) }}</div>
+      <div class="tip-car">{{ tip.m.car }}</div>
+      <div class="tip-score">
+        <span v-for="id in PLAYER_IDS" :key="id" :style="{ color: players[id].color }">
+          {{ players[id].name }} <b>{{ tip.score[id] }}</b>
+        </span>
+      </div>
+    </div>
     <PlayerLegend />
   </div>
 </template>

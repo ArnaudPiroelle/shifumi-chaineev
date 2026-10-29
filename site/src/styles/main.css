@@ -470,6 +470,58 @@ h1 {
 .chart .grid-line {
   stroke: var(--line);
 }
+.chart {
+  position: relative;
+}
+.chart svg {
+  touch-action: pan-y;
+}
+.chart .hover-mark line {
+  stroke: var(--text);
+  stroke-opacity: 0.5;
+  stroke-dasharray: 4 4;
+}
+.chart .hover-mark circle {
+  stroke: var(--bg);
+  stroke-width: 2;
+}
+/* infobulle du survol, à droite de la ligne (à gauche dans la 2ᵉ moitié) */
+.chart-tip {
+  position: absolute;
+  top: 0;
+  transform: translateX(12px);
+  pointer-events: none;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+.chart-tip.flip {
+  transform: translateX(calc(-100% - 12px));
+}
+.chart-tip .tip-head {
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+}
+.chart-tip .tip-car {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.chart-tip .tip-score {
+  display: flex;
+  gap: 12px;
+  margin-top: 4px;
+  font-weight: 700;
+}
+.chart-tip .tip-score b {
+  font-family: var(--mono);
+  font-size: 1rem;
+}
 
 /* ---------- Duels ---------- */
 .filters {
