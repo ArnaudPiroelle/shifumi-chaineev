@@ -91,6 +91,22 @@ button {
     margin: -32px 0 16px;
   }
 }
+/* portraits et logo VS : décor, pas d'image à glisser ni à sélectionner */
+.portrait,
+.vs-logo {
+  -webkit-user-drag: none;
+  user-select: none;
+}
+/* les emoji des coups sont des pictos, pas du texte à sélectionner */
+.chain .round,
+.step .m,
+.mv-emoji,
+.matrix .h,
+.coach .big,
+.donut svg text,
+.arena .emoji {
+  user-select: none;
+}
 .play-link,
 .gh-link {
   display: inline-flex;

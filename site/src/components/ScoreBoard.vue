@@ -20,7 +20,7 @@ const share = (n: number) => pct(n, stats.total) + "%";
           <span v-if="stats.leader === id" class="crown" title="En tête">👑</span> {{ players[id].name }}
         </span>
       </div>
-      <img v-if="i === 0" class="vs-logo" :src="vsLogo" alt="contre" width="280" height="240" />
+      <img v-if="i === 0" class="vs-logo" :src="vsLogo" alt="contre" width="280" height="240" draggable="false" />
     </template>
   </div>
   <div class="scoreboard">

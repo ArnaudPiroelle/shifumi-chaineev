@@ -21,5 +21,13 @@ const alt = computed(() => `${players[props.id].name}, ${props.mood === "win" ? 
 </script>
 
 <template>
-  <img class="portrait" :class="mood" :src="PORTRAITS[id][mood]" :alt="alt" width="320" height="320" />
+  <img
+    class="portrait"
+    :class="mood"
+    :src="PORTRAITS[id][mood]"
+    :alt="alt"
+    width="320"
+    height="320"
+    draggable="false"
+  />
 </template>
