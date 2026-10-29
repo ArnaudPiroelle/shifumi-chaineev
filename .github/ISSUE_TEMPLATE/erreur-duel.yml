@@ -1,0 +1,62 @@
+# Formulaire « Signaler une erreur » : le bouton du site pré-remplit les champs via l'URL
+# (?template=erreur-duel.yml&video=…&debut=…), chaque paramètre portant l'id d'un champ.
+name: Erreur dans un chifoumi
+description: Un coup mal noté, un extrait mal calé, un chifoumi oublié…
+title: "[Erreur] "
+labels: ["erreur"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci de prendre le temps de signaler une erreur ! Depuis le site, le bouton **Signaler une erreur** d'un duel remplit déjà la vidéo et les timestamps.
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type d'erreur
+      options:
+        - Mauvais coup enregistré
+        - Début ou fin de l'extrait mal placés
+        - Mauvaise voiture ou mauvaise date
+        - Chifoumi en double
+        - Chifoumi manquant
+        - Autre
+    validations:
+      required: true
+  - type: input
+    id: video
+    attributes:
+      label: Vidéo YouTube
+      description: Le lien de la vidéo.
+      placeholder: https://www.youtube.com/watch?v=…
+    validations:
+      required: true
+  - type: input
+    id: debut
+    attributes:
+      label: Début du chifoumi
+      description: Le moment où le chifoumi commence dans la vidéo.
+      placeholder: "32:34"
+    validations:
+      required: true
+  - type: input
+    id: fin
+    attributes:
+      label: Fin du chifoumi
+      placeholder: "32:43"
+  - type: input
+    id: duel
+    attributes:
+      label: Identifiant du duel
+      description: Rempli automatiquement depuis le site, laissez vide pour un chifoumi manquant.
+  - type: textarea
+    id: actuel
+    attributes:
+      label: Ce qu'affiche le site
+      description: Rempli automatiquement depuis le site.
+  - type: textarea
+    id: correction
+    attributes:
+      label: Ce qui s'est vraiment passé
+      description: Les bons coups, le bon moment… tout ce qui aide à corriger.
+    validations:
+      required: true

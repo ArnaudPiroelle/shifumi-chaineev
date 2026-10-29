@@ -8,6 +8,7 @@ import DuelsSection from "./components/duels/DuelsSection.vue";
 import DuelDialog from "./components/duels/DuelDialog.vue";
 import CoachSection from "./components/coach/CoachSection.vue";
 import GitHubLink from "./components/GitHubLink.vue";
+import ReportSection from "./components/ReportSection.vue";
 
 const { players, findMatch } = useShifumi();
 const { openId, open, close } = useDuelLink();
@@ -41,6 +42,7 @@ document.documentElement.style.setProperty("--b", players.b.color);
     <StatsSection />
     <CoachSection />
     <DuelsSection @open="open" />
+    <ReportSection />
   </main>
 
   <footer class="wrap">

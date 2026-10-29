@@ -790,6 +790,41 @@ dialog::backdrop {
   background: rgb(0 0 0 / 0.6);
   backdrop-filter: blur(2px);
 }
+.dlg-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px 16px;
+}
+/* section « Vous constatez une erreur ? » */
+.report {
+  margin-top: 56px;
+}
+.report h2 {
+  margin-top: 0;
+}
+.report p {
+  color: var(--muted);
+  max-width: 70ch;
+}
+.report strong {
+  color: var(--text);
+}
+.btn-report {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-weight: 700;
+  text-decoration: none;
+}
+.btn-report:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
 .btn-continue {
   border: 0;
   border-radius: 999px;

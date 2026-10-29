@@ -4,7 +4,9 @@ import { useShifumi } from "../../composables/useShifumi";
 import { useYouTubePlayer, type Clip } from "../../composables/useYouTubePlayer";
 import { fmtDate, plural } from "../../domain/format";
 import { MOVES, roundResult } from "../../domain/moves";
+import { reportIssueUrl, youtubeUrl } from "../../domain/report";
 import type { Match } from "../../domain/types";
+import { GITHUB_REPO } from "../../config";
 import VideoEndOverlay from "./VideoEndOverlay.vue";
 
 const props = defineProps<{ match: Match | undefined }>();
@@ -31,11 +33,11 @@ const clip = computed<Clip | undefined>(() =>
   props.match ? { videoId: props.match.video.id, start: props.match.start, end: props.match.end } : undefined,
 );
 const { pausedAtEnd, resume } = useYouTubePlayer(videoBox, clip);
-const youtubeUrl = computed(() => {
-  const m = props.match;
-  if (!m) return "";
-  return `https://www.youtube.com/watch?v=${encodeURIComponent(m.video.id)}${m.start != null ? `&t=${m.start}s` : ""}`;
-});
+const links = computed(() =>
+  props.match
+    ? { youtube: youtubeUrl(props.match), report: reportIssueUrl(GITHUB_REPO, props.match, players) }
+    : undefined,
+);
 const verdict = computed(() => {
   const m = props.match;
   if (!m || !winner.value) return "";
@@ -67,7 +69,10 @@ function onBackdropClick(e: MouseEvent) {
       <div class="dlg-body">
         <div class="duel-top">
           <span>{{ fmtDate(match.date) }} · {{ match.car }}</span>
-          <span><a :href="youtubeUrl" target="_blank" rel="noopener">Ouvrir sur YouTube ↗</a></span>
+          <span v-if="links" class="dlg-links">
+            <a :href="links.youtube" target="_blank" rel="noopener">Ouvrir sur YouTube ↗</a>
+            <a :href="links.report" target="_blank" rel="noopener">⚑ Signaler une erreur</a>
+          </span>
         </div>
         <div v-if="match.stake">
           🎯 Enjeu : <strong>{{ match.stake }}</strong>
