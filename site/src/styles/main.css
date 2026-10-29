@@ -74,10 +74,16 @@ button {
 .hero .wrap {
   position: relative;
 }
-.gh-link {
+/* en haut à droite : « Faire un Chifoumi » et le lien GitHub */
+.hero-actions {
   position: absolute;
   top: -32px;
   right: 16px;
+  display: flex;
+  gap: 8px;
+}
+.play-link,
+.gh-link {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -91,6 +97,11 @@ button {
   text-decoration: none;
   transition: border-color 0.15s;
 }
+.play-link {
+  cursor: pointer;
+  font-family: inherit;
+}
+.play-link:hover,
 .gh-link:hover {
   border-color: color-mix(in srgb, var(--text) 35%, var(--line));
 }
@@ -934,5 +945,223 @@ footer {
     transition: none !important;
     animation: none !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- Faire un chifoumi (plein écran) ---------- */
+dialog.arena {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background:
+    radial-gradient(ellipse at 50% 30%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 60%), var(--bg);
+}
+dialog.arena[open] {
+  display: flex;
+  flex-direction: column;
+}
+.arena-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line);
+}
+.arena-top strong,
+.arena-score {
+  white-space: nowrap;
+}
+.arena-score {
+  font-family: var(--mono);
+  margin-left: auto;
+}
+.arena-score b {
+  font-size: 1.2rem;
+}
+.arena-pick,
+.arena-stage {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px;
+  text-align: center;
+}
+.arena-pick h2 {
+  margin: 0;
+}
+.arena-opponents {
+  display: flex;
+  gap: clamp(16px, 6vw, 64px);
+  margin-top: 12px;
+}
+.arena-opponent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  cursor: pointer;
+  font-size: 1.3rem;
+  font-weight: 700;
+  transition:
+    transform 0.15s,
+    border-color 0.15s;
+}
+.arena-opponent:hover,
+.arena-opponent:focus-visible {
+  transform: translateY(-4px);
+  border-color: var(--c);
+}
+.arena .portrait {
+  width: clamp(96px, 22vw, 160px);
+  height: auto;
+}
+.arena-hands {
+  display: flex;
+  align-items: center;
+  gap: clamp(16px, 6vw, 56px);
+}
+.hand {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-weight: 700;
+}
+.hand .emoji {
+  font-size: clamp(64px, 16vw, 120px);
+  line-height: 1;
+}
+/* poing qui bat la mesure pendant le décompte, une fois par chiffre */
+.arena-hands.countdown .emoji {
+  animation: pump 0.7s ease-in-out infinite;
+}
+@keyframes pump {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-24px) rotate(-8deg);
+  }
+}
+.arena-hands.reveal .emoji {
+  animation: reveal-pop 0.35s ease-out;
+}
+@keyframes reveal-pop {
+  from {
+    transform: scale(0.6);
+  }
+}
+.arena-hands.win .hand.user .emoji,
+.arena-hands.lose .hand.bot .emoji {
+  filter: drop-shadow(0 0 18px color-mix(in srgb, var(--accent) 70%, transparent));
+}
+.arena-center {
+  min-width: 2ch;
+  font-family: var(--mono);
+  font-weight: 700;
+}
+.count-num {
+  display: inline-block;
+  font-size: clamp(48px, 10vw, 80px);
+  color: var(--accent);
+  animation: count-pop 0.7s ease-out;
+}
+@keyframes count-pop {
+  from {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+}
+.vs-small {
+  color: var(--muted);
+  font-size: 1.2rem;
+}
+.arena-result {
+  min-height: 1.6em;
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+.arena-result.win {
+  color: var(--accent);
+}
+.arena-result.lose {
+  color: #ff6b6b;
+}
+.arena-moves {
+  padding: 16px 16px 24px;
+  border-top: 1px solid var(--line);
+  background: var(--panel);
+  text-align: center;
+}
+.arena-prompt {
+  margin: 0 0 12px;
+  color: var(--muted);
+}
+.arena-buttons {
+  display: flex;
+  justify-content: center;
+  gap: clamp(10px, 4vw, 28px);
+}
+.arena-move {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: clamp(92px, 26vw, 140px);
+  padding: 12px 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+  cursor: pointer;
+  font-weight: 700;
+  transition:
+    transform 0.15s,
+    border-color 0.15s;
+}
+.arena-move .emoji {
+  font-size: clamp(44px, 12vw, 72px);
+  line-height: 1.1;
+}
+.arena-move:hover:not(:disabled) {
+  transform: translateY(-4px);
+  border-color: var(--accent);
+}
+.arena-move[aria-pressed="true"] {
+  border-color: var(--accent);
+}
+.arena-move:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+.arena-switch {
+  margin-top: 12px;
+  background: none;
+  border: 0;
+  color: var(--muted);
+  text-decoration: underline;
+  cursor: pointer;
+}
+@media (prefers-reduced-motion: reduce) {
+  .arena-hands .emoji,
+  .count-num {
+    animation: none !important;
   }
 }

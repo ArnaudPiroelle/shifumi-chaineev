@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useShifumi } from "./composables/useShifumi";
 import { useDuelLink } from "./composables/useDuelLink";
 import ScoreBoard from "./components/ScoreBoard.vue";
@@ -9,10 +9,13 @@ import DuelDialog from "./components/duels/DuelDialog.vue";
 import CoachSection from "./components/coach/CoachSection.vue";
 import GitHubLink from "./components/GitHubLink.vue";
 import ReportSection from "./components/ReportSection.vue";
+import ChifoumiGame from "./components/game/ChifoumiGame.vue";
 
 const { players, findMatch } = useShifumi();
 const { openId, open, close } = useDuelLink();
 const openMatch = computed(() => (openId.value ? findMatch(openId.value) : undefined));
+// le mode « Faire un chifoumi » : n'existe que pendant la partie (le quitter remet tout à zéro)
+const playing = ref(false);
 
 // les couleurs des joueurs pilotent tout le thème (dégradés, barres…)
 document.documentElement.style.setProperty("--a", players.a.color);
@@ -22,7 +25,10 @@ document.documentElement.style.setProperty("--b", players.b.color);
 <template>
   <header class="hero">
     <div class="wrap">
-      <GitHubLink />
+      <div class="hero-actions">
+        <button class="play-link" @click="playing = true">✊ Faire un Chifoumi</button>
+        <GitHubLink />
+      </div>
       <p class="eyebrow">⚡ LaChaineEv · Classement officieux</p>
       <h1>Le Grand Prix du <span class="accent">Chifoumi</span></h1>
       <p class="lede">
@@ -50,4 +56,5 @@ document.documentElement.style.setProperty("--b", players.b.color);
   </footer>
 
   <DuelDialog :match="openMatch" @close="close" />
+  <ChifoumiGame v-if="playing" @close="playing = false" />
 </template>
