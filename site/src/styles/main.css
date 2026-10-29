@@ -875,6 +875,15 @@ dialog::backdrop {
 .video-shield.stopped {
   background: rgb(0 0 0 / 0.45);
 }
+/* jamais démarrée : le ▶ attend un peu, car au démarrage normal le lecteur passe par « non démarré » sans s'y arrêter */
+.video-shield.waiting {
+  animation: shield-in 0.3s ease-out 0.8s both;
+}
+@keyframes shield-in {
+  from {
+    opacity: 0;
+  }
+}
 .video-play {
   display: grid;
   place-items: center;

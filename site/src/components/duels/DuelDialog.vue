@@ -32,7 +32,7 @@ const videoBox = ref<HTMLElement>();
 const clip = computed<Clip | undefined>(() =>
   props.match ? { videoId: props.match.video.id, start: props.match.start, end: props.match.end } : undefined,
 );
-const { pausedAtEnd, stopped, resume, toggle, replay } = useYouTubePlayer(videoBox, clip);
+const { pausedAtEnd, stopped, started, resume, toggle, replay } = useYouTubePlayer(videoBox, clip);
 const links = computed(() =>
   props.match
     ? { youtube: youtubeUrl(props.match), report: reportIssueUrl(GITHUB_REPO, props.match, players) }
@@ -69,7 +69,7 @@ function onBackdropClick(e: MouseEvent) {
         <button
           v-else
           class="video-shield"
-          :class="{ stopped }"
+          :class="{ stopped, waiting: stopped && !started }"
           :aria-label="stopped ? 'Lire la vidéo' : 'Mettre la vidéo en pause'"
           @click="toggle"
         >

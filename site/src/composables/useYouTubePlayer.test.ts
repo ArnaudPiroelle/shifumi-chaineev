@@ -28,6 +28,8 @@ class FakePlayer {
     this.opts.events!.onStateChange!({ data: state } as YT.OnStateChangeEvent);
   }
 }
+const UNSTARTED = -1;
+const ENDED = 0;
 const PLAYING = 1;
 const PAUSED = 2;
 const CUED = 5;
@@ -46,7 +48,7 @@ function setup(initial: Clip | undefined) {
 
 beforeEach(() => {
   vi.useFakeTimers();
-  vi.stubGlobal("YT", { Player: FakePlayer, PlayerState: { PLAYING, PAUSED, CUED } });
+  vi.stubGlobal("YT", { Player: FakePlayer, PlayerState: { UNSTARTED, ENDED, PLAYING, PAUSED, CUED } });
 });
 afterEach(() => {
   vi.useRealTimers();
@@ -74,6 +76,23 @@ describe("useYouTubePlayer", () => {
     expect(p.unloaded).toEqual(["captions"]);
     p.emit(PLAYING); // YouTube les recharge au lancement de la lecture
     expect(p.unloaded).toEqual(["captions", "captions"]);
+  });
+
+  it("signale une lecture automatique refusée, que toggle() lance", async () => {
+    const { api } = setup(clip);
+    await nextTick();
+    const p = FakePlayer.last;
+    p.paused = true; // le navigateur a bloqué l'autoplay : le lecteur reste non démarré
+    p.opts.events!.onReady!({ target: p } as unknown as YT.PlayerEvent);
+    expect(api().stopped.value).toBe(true);
+    expect(api().started.value).toBe(false);
+    api().toggle();
+    expect(p.paused).toBe(false);
+    p.emit(PLAYING);
+    expect(api().stopped.value).toBe(false);
+    expect(api().started.value).toBe(true);
+    p.emit(UNSTARTED);
+    expect(api().stopped.value).toBe(true);
   });
 
   it("met en pause et relance avec toggle(), et signale l'arrêt", async () => {

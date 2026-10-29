@@ -43,8 +43,13 @@ export function loadYouTubeApi(): Promise<void> {
  */
 export function useYouTubePlayer(container: Ref<HTMLElement | undefined>, clip: Ref<Clip | undefined>) {
   const pausedAtEnd = ref(false);
-  /** la vidéo est arrêtée (pause, ou lecture automatique refusée par le navigateur) */
+  /**
+   * la vidéo est arrêtée : en pause, ou jamais démarrée parce que le navigateur a refusé la lecture
+   * automatique (sans contrôles YouTube, seul notre bouton ▶ permet alors de la lancer)
+   */
   const stopped = ref(false);
+  /** la vidéo a joué au moins une fois (sinon, arrêtée = lecture automatique pas encore partie ou refusée) */
+  const started = ref(false);
   let player: YT.Player | undefined;
   let timer: ReturnType<typeof setInterval> | undefined;
   let continued = false;
@@ -59,6 +64,7 @@ export function useYouTubePlayer(container: Ref<HTMLElement | undefined>, clip: 
     player = undefined;
     pausedAtEnd.value = false;
     stopped.value = false;
+    started.value = false;
     continued = false;
   }
 
@@ -67,6 +73,12 @@ export function useYouTubePlayer(container: Ref<HTMLElement | undefined>, clip: 
   function hideCaptions() {
     (player as (YT.Player & { unloadModule?: (module: string) => void }) | undefined)?.unloadModule?.("captions");
   }
+
+  const isStopped = (state: YT.PlayerState) =>
+    state === YT.PlayerState.UNSTARTED ||
+    state === YT.PlayerState.ENDED ||
+    state === YT.PlayerState.PAUSED ||
+    state === YT.PlayerState.CUED;
 
   function checkEnd(end: number) {
     if (!player || continued || player.getCurrentTime() < end) return;
@@ -99,9 +111,14 @@ export function useYouTubePlayer(container: Ref<HTMLElement | undefined>, clip: 
       events: {
         // YouTube (re)charge le module des sous-titres au lancement de la lecture : on le retire à ce moment-là
         onApiChange: hideCaptions,
+        // lecture automatique refusée : le lecteur reste « non démarré » sans changer d'état
+        onReady: (e) => (stopped.value = isStopped(e.target.getPlayerState())),
         onStateChange: (e) => {
-          if (e.data === YT.PlayerState.PLAYING) hideCaptions();
-          stopped.value = e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.CUED;
+          if (e.data === YT.PlayerState.PLAYING) {
+            started.value = true;
+            hideCaptions();
+          }
+          stopped.value = isStopped(e.data);
           // on ne surveille la position que pendant la lecture
           if (e.data === YT.PlayerState.PLAYING && c.end != null && !continued && !timer) {
             const end = c.end;
@@ -146,5 +163,5 @@ export function useYouTubePlayer(container: Ref<HTMLElement | undefined>, clip: 
   );
   onBeforeUnmount(destroy);
 
-  return { pausedAtEnd, stopped, resume, toggle, replay };
+  return { pausedAtEnd, stopped, started, resume, toggle, replay };
 }
