@@ -7,6 +7,7 @@ import StatsSection from "./components/stats/StatsSection.vue";
 import DuelsSection from "./components/duels/DuelsSection.vue";
 import DuelDialog from "./components/duels/DuelDialog.vue";
 import CoachSection from "./components/coach/CoachSection.vue";
+import GitHubLink from "./components/GitHubLink.vue";
 
 const { players, findMatch } = useShifumi();
 const { openId, open, close } = useDuelLink();
@@ -20,6 +21,7 @@ document.documentElement.style.setProperty("--b", players.b.color);
 <template>
   <header class="hero">
     <div class="wrap">
+      <GitHubLink />
       <p class="eyebrow">⚡ LaChaineEv · Classement officieux</p>
       <h1>Le Grand Prix du <span class="accent">Chifoumi</span></h1>
       <p class="lede">

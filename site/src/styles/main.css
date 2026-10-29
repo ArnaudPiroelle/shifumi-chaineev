@@ -70,6 +70,41 @@ button {
     radial-gradient(700px 300px at 85% 0%, color-mix(in srgb, var(--b) 18%, transparent), transparent);
   border-bottom: 1px solid var(--line);
 }
+/* lien discret vers le dépôt, en haut à droite */
+.hero .wrap {
+  position: relative;
+}
+.gh-link {
+  position: absolute;
+  top: -32px;
+  right: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #18171d;
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: border-color 0.15s;
+}
+.gh-link:hover {
+  border-color: color-mix(in srgb, var(--text) 35%, var(--line));
+}
+.gh-sep {
+  align-self: stretch;
+  width: 1px;
+  background: var(--line);
+}
+.gh-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #f5b301;
+}
 .eyebrow {
   font-family: var(--mono);
   color: var(--muted);
