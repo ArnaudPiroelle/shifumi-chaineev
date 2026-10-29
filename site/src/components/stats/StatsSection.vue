@@ -42,7 +42,7 @@ const { players, stats } = useShifumi();
       </StatCard>
 
       <StatCard title="Face-à-face des coups">
-        <template #sub>Chaque manche jouée — ligne : {{ players.a.name }}, colonne : {{ players.b.name }}</template>
+        <template #sub>Combien de fois chaque couple de coups est sorti, toutes manches confondues</template>
         <MoveMatrix />
       </StatCard>
 

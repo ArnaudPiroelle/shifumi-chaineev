@@ -349,8 +349,19 @@ h1 {
 /* Matrice */
 .matrix {
   display: grid;
-  grid-template-columns: 40px repeat(3, 1fr);
+  grid-template-columns: auto repeat(3, 1fr);
   gap: 4px;
+}
+/* « Alex joue → » au-dessus des colonnes, « JC joue ↓ » au-dessus de la colonne de ses coups */
+.matrix .axis {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+}
+.matrix .axis-corner {
+  align-self: end;
+  padding-right: 4px;
 }
 .matrix .h {
   display: grid;
@@ -365,6 +376,7 @@ h1 {
   font-family: var(--mono);
   font-weight: 700;
   font-size: 1.1rem;
+  color: #0b0f14;
 }
 
 /* Après égalité */
