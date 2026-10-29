@@ -4,7 +4,7 @@ Site qui recense les chifoumis de LaChaineEv : Vue 3 + Vite + TypeScript, publi�
 
 ```
 site/    le site public (projet Vue) — seul son build (site/dist/) est mis en ligne
-tools/   outils privés : détection automatique + page de validation (jamais publiés)
+tools/   outils privés (projet Vue à part) : détection automatique + page de validation (jamais publiés)
 ```
 
 ## Les données
@@ -42,22 +42,33 @@ Pour ajouter une stat : la calculer dans `domain/stats.ts` (avec un test), puis 
 
 ## Les outils (tools/)
 
+Même stack que le site (Vue 3 + Vite + TypeScript), dans un projet à part qui n'est jamais publié.
+Il réutilise les types, les règles du jeu et le style du site (`site/src/`, via l'alias `@site`).
+Une fois : `cd tools && npm install`.
+
 ```bash
-python3 tools/serve.py
+npm run dev        # page de validation : http://localhost:8765/
+npm run detect     # détection automatique (voir plus bas)
+npm run check      # types + lint + tests
 ```
 
-C'est un `python3 -m http.server 8765` qui permet en plus à la page de validation d'écrire dans `shifumi.json`.
-Pendant que `npm run dev` tourne, le site se met à jour tout seul après un enregistrement.
+Organisation de `tools/` :
 
-- la validation : http://localhost:8765/tools/review.html
+- `src/` — la page de validation (Vue) ; sa logique pure est dans `src/domain/review.ts`.
+- `server/api.ts` — un plugin Vite qui ajoute au serveur de dev l'API locale de la page : lecture de
+  `shifumi.json` et `candidates.json`, écriture des duels validés dans `site/src/data/shifumi.json`.
+  Le serveur n'écoute que sur `localhost` et n'accepte les écritures que depuis sa propre page.
+- `cli/` — la détection (`detect.ts`, lancée directement par Node) ; sa partie pure est dans `detection.ts`.
+
+Pendant que `npm run dev` du site tourne, le site se met à jour tout seul après un enregistrement.
 
 ## Détection automatique (sous-titres YouTube)
 
-Le script [`tools/detect.py`](tools/detect.py) récupère les sous-titres automatiques de toutes les vidéos
+`npm run detect` (dans `tools/`) récupère les sous-titres automatiques de toutes les vidéos
 de la chaîne et repère les passages où l'on entend « chifoumi », « pierre feuille ciseaux »…
 Les passages trouvés vont dans `tools/candidates.json`, puis se valident à la main dans la page de validation.
 
-**Installation (une fois)** : yt-dlp dans un environnement Python dédié
+**Installation (une fois)** : Node.js 22.18 ou plus récent, et yt-dlp dans un environnement Python dédié
 
 ```bash
 python3 -m venv tools/.venv && tools/.venv/bin/pip install yt-dlp
@@ -66,20 +77,21 @@ python3 -m venv tools/.venv && tools/.venv/bin/pip install yt-dlp
 **Lancer la détection** (incrémental : seules les nouvelles vidéos sont téléchargées, le reste vient de `tools/cache/`)
 
 ```bash
-python3 tools/detect.py
+npm run detect
 ```
 
-Options utiles : `--limit 20` (les 20 dernières vidéos), `--video <ID>`, `--offline` (recalcule sans réseau,
-pratique après avoir modifié les mots-clés), `--cookies-from-browser firefox` si YouTube demande de prouver qu'on n'est pas un robot.
+Options utiles (après `--`, par ex. `npm run detect -- --limit 20`) : `--limit 20` (les 20 dernières vidéos), `--video <ID>`,
+`--offline` (recalcule sans réseau, pratique après avoir modifié les mots-clés), `--cookies-from-browser firefox`
+si YouTube demande de prouver qu'on n'est pas un robot, `--help` pour le reste.
 Pense à mettre yt-dlp à jour de temps en temps (`tools/.venv/bin/pip install -U yt-dlp`), YouTube change souvent.
 
-**Valider** : lancer `python3 tools/serve.py` puis ouvrir http://localhost:8765/tools/review.html.
+**Valider** : lancer `npm run dev` dans `tools/` puis ouvrir http://localhost:8765/.
 Pour chaque passage : regarder l'extrait, caler début/fin (📍), saisir les coups de chaque manche, puis « Valider » ou « Pas un chifoumi ».
-Le bouton « Exporter » puis « Enregistrer » écrit les duels validés directement dans `site/src/data/shifumi.json`
-(nécessite `tools/serve.py`) ; un duel déjà publié et modifié dans la page est remplacé. « Copier » donne les mêmes entrées à coller à la main.
+Le bouton « Exporter » puis « Enregistrer » écrit les duels validés directement dans `site/src/data/shifumi.json` ;
+un duel déjà publié et modifié dans la page est remplacé. « Copier » donne les mêmes entrées à coller à la main.
 Si `shifumi.json` a été modifié à la main, la page reprend ces valeurs ; un duel modifié des deux côtés est signalé et n'est pas exporté.
 L'onglet « Sans détection » liste les vidéos où aucun mot-clé n'a été trouvé : marque-les « vérifiée » ou ajoute à la main un chifoumi raté.
-La progression est gardée dans le navigateur (localStorage) : utilise toujours le même navigateur et la même adresse.
+La progression est gardée dans le navigateur (localStorage) : utilise toujours le même navigateur et la même adresse (http://localhost:8765).
 
 ## Mettre en ligne
 

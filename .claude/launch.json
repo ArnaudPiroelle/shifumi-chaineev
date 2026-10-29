@@ -18,9 +18,12 @@
     },
     {
       "name": "tools",
-      "runtimeExecutable": "python3",
+      "runtimeExecutable": "npm",
       "runtimeArgs": [
-        "tools/serve.py"
+        "--prefix",
+        "tools",
+        "run",
+        "dev"
       ],
       "port": 8765
     }

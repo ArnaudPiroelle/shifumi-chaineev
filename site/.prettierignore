@@ -1,4 +1,4 @@
 dist
 node_modules
-# écrit par tools/serve.py : on garde son format
+# écrit par la page de validation (tools/) : on garde son format
 src/data/shifumi.json

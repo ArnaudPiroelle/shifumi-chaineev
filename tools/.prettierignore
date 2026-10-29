@@ -1,0 +1,5 @@
+node_modules
+cache
+.venv
+# écrit par npm run detect
+candidates.json
