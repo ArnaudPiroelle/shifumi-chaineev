@@ -1,7 +1,33 @@
 {
- "generated": "2026-10-28T18:44:46+00:00",
- "videos": 213,
+ "generated": "2026-11-02T20:53:12+00:00",
+ "videos": 215,
  "candidates": [
+  {
+   "id": "DxYqwu9QCmk@1644",
+   "videoId": "DxYqwu9QCmk",
+   "title": "Essai Ioniq 3 : la meilleure Hyundai électrique ? (ioniq 28 challenge)",
+   "date": "2026-11-02",
+   "start": 1644,
+   "end": 1672,
+   "score": 3,
+   "keywords": [
+    "chifoumi"
+   ],
+   "snippet": "que tu peux rester appuyé et dire \"Non, je réponds ? Bonne question. Alex appelle, je laisse appuyer Ça raccroche. C'est génial. Messagerie Orange, bonjour. Bon, euh, chifoumi, celui qui gagne perd, qui perd gagne et et cetera. Ouais, allez. J'ai gagné. Ah donc, c'est moi qui ? Ah oui, c'est toi qui passes devant. Je comprends rien du tout, c'est vraiment trop compliqué. Attends, ne pars pas tout de suite. Sincèrement, le passage de ma IONIQ 28 à cette voiture en terme de confort"
+  },
+  {
+   "id": "DxYqwu9QCmk@1163",
+   "videoId": "DxYqwu9QCmk",
+   "title": "Essai Ioniq 3 : la meilleure Hyundai électrique ? (ioniq 28 challenge)",
+   "date": "2026-11-02",
+   "start": 1163,
+   "end": 1193,
+   "score": 6,
+   "keywords": [
+    "chifoumi"
+   ],
+   "snippet": "est généralement de 65 km/h. Bon Alex, ça fait déjà quelques instants que tu es arrêté, est-ce que la conso a Et donc ça compte les consos à l'arrêt, donc il y a de grandes chances que l'écart à la recharge soit vraiment fiable. Chifoumi pour savoir qui part en Non, chifoumi pour savoir celui qui perd part en premier. Voir si le fait de d'être parti perdant m'avantage. Oh merde. Donc voilà. Donc [rires] voilà. C'est un con celui qui gagne perd, il perd, il gagne enfin."
+  },
   {
    "id": "sUPEypCpFuU@1946",
    "videoId": "sUPEypCpFuU",
@@ -1144,6 +1170,13 @@
   }
  ],
  "undetected": [
+  {
+   "videoId": "njiiRcKAa7Q",
+   "title": "700KM en VW ID3 Neo électrique : La vraie TESLA KILLEUSE !?",
+   "date": "2026-10-29",
+   "duration": 2391,
+   "subs": true
+  },
   {
    "videoId": "2ZySpRDscEQ",
    "title": "650Km en XPENG L03 : Planificateur, adas, conso et recharge, que vaut-elle sur long trajet ?",

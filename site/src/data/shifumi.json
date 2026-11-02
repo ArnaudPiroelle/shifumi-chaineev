@@ -1108,6 +1108,40 @@
           "b": "pierre"
         }
       ]
+    },
+    {
+      "id": "DxYqwu9QCmk-1183",
+      "date": "2026-11-02",
+      "car": "Ioniq 3",
+      "video": {
+        "id": "DxYqwu9QCmk",
+        "start": "19:43",
+        "end": "19:46",
+        "title": "Essai Ioniq 3 : la meilleure Hyundai électrique ? (ioniq 28 challenge)"
+      },
+      "rounds": [
+        {
+          "a": "feuille",
+          "b": "ciseaux"
+        }
+      ]
+    },
+    {
+      "id": "DxYqwu9QCmk-1657",
+      "date": "2026-11-02",
+      "car": "Ioniq 3",
+      "video": {
+        "id": "DxYqwu9QCmk",
+        "start": "27:37",
+        "end": "27:40",
+        "title": "Essai Ioniq 3 : la meilleure Hyundai électrique ? (ioniq 28 challenge)"
+      },
+      "rounds": [
+        {
+          "a": "ciseaux",
+          "b": "feuille"
+        }
+      ]
     }
   ]
 }
