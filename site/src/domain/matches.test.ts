@@ -40,4 +40,11 @@ describe("prepareMatches", () => {
     expect(out.map((m) => m.id)).toEqual(["early", "late"]);
     expect(warn).toHaveBeenCalledOnce();
   });
+  it("à date égale, trie par horodatage dans la vidéo", () => {
+    const out = prepareMatches([
+      rawMatch("pc", { id: "20min", video: { id: "v", start: "20:00", title: "" } }),
+      rawMatch("pc", { id: "10min", video: { id: "v", start: "10:00", title: "" } }),
+    ]);
+    expect(out.map((m) => m.id)).toEqual(["10min", "20min"]);
+  });
 });

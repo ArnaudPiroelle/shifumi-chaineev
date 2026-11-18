@@ -22,7 +22,15 @@ export function validateMatch(m: RawMatch): string[] {
   return errors;
 }
 
-/** Calcule gagnant, égalités et temps ; écarte (avec un avertissement) les duels mal saisis ; trie par date. */
+/** Ordre chronologique : par date de la vidéo, puis par horodatage dans la vidéo. */
+export function byChronology(x: Match, y: Match): number {
+  return x.date.localeCompare(y.date) || (x.start ?? 0) - (y.start ?? 0);
+}
+
+/**
+ * Calcule gagnant, égalités et temps ; écarte (avec un avertissement) les duels mal saisis ;
+ * trie dans l'ordre chronologique (date, puis horodatage dans la vidéo).
+ */
 export function prepareMatches(raw: readonly RawMatch[]): Match[] {
   return raw
     .filter((m) => {
@@ -40,5 +48,5 @@ export function prepareMatches(raw: readonly RawMatch[]): Match[] {
         end: toSeconds(m.video.end),
       };
     })
-    .sort((x, y) => x.date.localeCompare(y.date));
+    .sort(byChronology);
 }
