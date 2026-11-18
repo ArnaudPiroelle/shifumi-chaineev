@@ -1,3 +1,4 @@
+import { byChronology } from "./matches";
 import type { Match, PlayerId } from "./types";
 
 export interface DuelFilter {
@@ -10,8 +11,8 @@ export interface DuelFilter {
 export const emptyFilter = (): DuelFilter => ({ query: "", winner: "all", onlyTies: false });
 
 /**
- * Les duels qui correspondent au filtre, de la vidéo la plus récente à la plus ancienne ;
- * les duels d'une même vidéo restent dans l'ordre où ils y apparaissent.
+ * Les duels qui correspondent au filtre, du plus récent au plus ancien : par date de la vidéo,
+ * puis, dans une même vidéo, du dernier horodatage au premier.
  */
 export function filterMatches(matches: readonly Match[], f: DuelFilter): Match[] {
   const q = f.query.trim().toLowerCase();
@@ -19,5 +20,5 @@ export function filterMatches(matches: readonly Match[], f: DuelFilter): Match[]
     .filter((m) => f.winner === "all" || (f.winner === "draw" ? !m.winner : m.winner === f.winner))
     .filter((m) => !f.onlyTies || m.ties > 0)
     .filter((m) => !q || [m.car, m.stake, m.note, m.video.title].join(" ").toLowerCase().includes(q))
-    .sort((x, y) => y.date.localeCompare(x.date) || (x.start ?? 0) - (y.start ?? 0));
+    .sort((x, y) => byChronology(y, x));
 }

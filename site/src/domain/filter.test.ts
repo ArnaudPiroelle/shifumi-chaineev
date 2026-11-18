@@ -13,13 +13,13 @@ const ids = (f: Partial<ReturnType<typeof emptyFilter>>) =>
 
 describe("filterMatches", () => {
   it("liste du plus récent au plus ancien", () => expect(ids({})).toEqual(["3", "2", "1"]));
-  it("garde les duels d'une même vidéo dans l'ordre de leur horodatage", () => {
+  it("dans une même vidéo, liste du dernier horodatage au premier", () => {
     const sameVideo = prepareMatches([
       rawMatch("pc", { id: "old", date: "2024-01-01" }),
       rawMatch("pc", { id: "20min", date: "2024-02-01", video: { id: "v", start: "20:00", title: "" } }),
       rawMatch("pc", { id: "10min", date: "2024-02-01", video: { id: "v", start: "10:00", title: "" } }),
     ]);
-    expect(filterMatches(sameVideo, emptyFilter()).map((m) => m.id)).toEqual(["10min", "20min", "old"]);
+    expect(filterMatches(sameVideo, emptyFilter()).map((m) => m.id)).toEqual(["20min", "10min", "old"]);
   });
   it("filtre par gagnant ou nul", () => {
     expect(ids({ winner: "a" })).toEqual(["1"]);
